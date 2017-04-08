@@ -1,0 +1,55 @@
+<form name="vm.uploadDocForm" flex="noshrink" layout-xs="column" layout="column" layout-align="space-around center" layout-padding>
+    <h3 layout class="center md-headline">Upload Files</h3>
+    <div flex-xs="100" flex-sm="100" layout-xs="column" layout-sm="column" layout class="full-width" layout-padding>
+        <md-card id="upload-card" layout="column" layout-align="center center" flex="grow">
+            <md-card-content layout-fill>
+                <lf-ng-md-file-input drag lf-required preview lf-files='vm.files' multiple layout-fill flex> </lf-ng-md-file-input>
+            </md-card-content>
+        </md-card>
+        <md-card id="upload-card" layout="column" layout-align="center center" flex="grow">
+            <md-card-content layout-fill layout="column">
+                <div layout="column" flex>
+                    <div layout="column" layout-padding>
+                        <md-input-container class="md-block" flex-gt-sm>
+                            <label>Study</label>
+                            <input ng-model="vm.model.study">
+                        </md-input-container>
+                        <md-input-container class="md-block" flex-gt-sm>
+                            <label>Visit</label>
+                            <input ng-model="vm.model.visit">
+                        </md-input-container>
+                        <md-input-container class="md-block" flex-gt-sm>
+                            <label>Session</label>
+                            <input ng-model="vm.model.session">
+                        </md-input-container>
+                        <md-input-container class="md-block" flex-gt-sm>
+                            <label>Subject</label>
+                            <input ng-model="vm.model.subject">
+                        </md-input-container>
+                        <md-input-container>
+                            <label>FileType</label>
+                            <md-select ng-model="vm.model.filetype">
+                                <md-option ng-repeat="type in vm.fileTypes" ng-value="type.Name">{{type.Name}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container class="md-block">
+                            <label>Notes</label>
+                            <textarea ng-model="vm.model.notes" md-maxlength="150" rows="2" md-select-on-focus></textarea>
+                        </md-input-container>
+                        <md-input-container class="md-block">
+                            <md-switch class="md-primary no-margins" ng-model="vm.model.parse" aria-label="Parse">
+                                Parse Data
+                            </md-switch>
+                        </md-input-container>
+                    </div>
+                </div>
+            </md-card-content>
+        </md-card>
+    </div>
+    <div layout="row" flex class="full-width">
+        <div layout="row" layout-align="end center" flex="100">
+            <md-button type="button" ng-click="vm.cancel()">Cancel</md-button>
+            <md-button type="submit" ng-disabled="vm.uploadDocForm.$invalid" class="md-accent md-raised md-button md-ink-ripple" ng-click="vm.submit($event)">Upload</md-button>
+        </div>
+    </div>
+</form>

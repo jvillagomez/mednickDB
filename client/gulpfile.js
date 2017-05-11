@@ -46,39 +46,14 @@ gulp.task('bower', ['bower:copy'], function() {
 })
 
 //*******************************//
-//****** Run python server ******//
+//****** Run Express server ******//
 //*******************************//
 
-// //pip install django--1.9.11
-// gulp.task('python:makevenv', function() {
-//     //virtualenv venv
-//
-// })
-
-// gulp.task('python:runvenv', function() {
-//     //venv\scripts\activate
-//     console.info('Running virtual environment');
-//     return run('start cmd /K ..\\venv\\Scripts\\activate ').exec();
-// })
-
-// gulp.task('python:makemigrations', function() {
-//     var spawn = process.spawn;
-//     console.info('Making migration');
-//     var PIPE = { stdio: 'inherit' };
-//     spawn('python', ['server/manage.py', 'makemigrations', 'cabinet'], PIPE);
-// })
-
-// gulp.task('python:migrate', ['python:makemigrations'], function() {
-//     var spawn = process.spawn;
-//     console.info('Starting django migration');
-//     var PIPE = { stdio: 'inherit' };
-//     spawn('python', ['server/manage.py', 'migrate'], PIPE);
-// })
-//
-// gulp.task('python:runserver', function() {
-//     console.log("Starting pythong server...");
-//     return run('start cmd /K python server/manage.py runserver').exec();
-// })
+gulp.task('serveExpress', function() {
+    console.log("Starting Express server...");
+    run('start cmd /K node ../server/server.js').exec();
+    return console.log('API is online')
+})
 
 //**************************//
 //****** Serve app *********//
@@ -86,18 +61,18 @@ gulp.task('bower', ['bower:copy'], function() {
 //
 var server = {
     host: 'localhost',
-    port: '8001'
+    port: '8000'
 }
-//
-// gulp.task('webserver', ['python:runserver'], function() {
-//     gulp.src('.')
-//         .pipe(webserver({
-//             host: server.host,
-//             port: server.port,
-//             livereload: true,
-//             directoryListing: false
-//         }));
-// });
+
+gulp.task('webserver', ['serveExpress'], function() {
+    gulp.src('.')
+        .pipe(webserver({
+            host: server.host,
+            port: server.port,
+            livereload: true,
+            directoryListing: false
+        }));
+});
 
 gulp.task('openbrowser', ['webserver'], function() {
     open('http://' + server.host + ':' + server.port);

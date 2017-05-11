@@ -1,10 +1,10 @@
 // Implemented file uplaod, without logging in DB.
-DO// Double check to make sure no db objects get created in this process.
-DONE// Begin logging.
+// TODO// Double check to make sure no db objects get created in this process.
+// DONE// Begin logging.
 // Attach angular app to fornt end
 // Set up gulp for myself on server side
-DONE// Dynamically create path
-DONE// Create temp location for unfinished docs
+// DONE// Dynamically create path
+// DONE// Create temp location for unfinished docs
 // Multiple doc implementation
 // Download files
 // Create files from DB objects
@@ -77,7 +77,7 @@ app.post('/incompleteUpload',function(req,res){
         "dateUploaded":dateUploaded,
         "expired":expired,
         "expiredDate":expiredDate
-    } function (err,doc){
+    }, function (err,doc){
         if(err){
             return res.status(500).json(req.body);
         }
@@ -126,7 +126,7 @@ app.post('/completeUpload',function(req,res){
         "dateUploaded":dateUploaded,
         "expired":expired,
         "expiredDate":expiredDate
-    } function (err,doc){
+    }, function (err,doc){
         if(err){
             return res.status(500).json(req.body);
         }
@@ -138,48 +138,48 @@ app.post('/completeUpload',function(req,res){
 
 // for debugging file uplaods ONLY
 // app.post('/upload',function(req,res){
-    if(!req.files){
-        return res.status(400).send('No files were uploaded.')
-    }
-    let fileObj = req.files.docfile;
-    fileObj.mv("C:\\node\\mednickdb\\nacarat\\server\\mednickFiles\\fileq.txt", function(err){
-        if(err){
-            return res.status(500).send(err);
-        }
-        else {
-            res.status(200).send('FileUplaoded!!');
-        }
-    })
-})
+//     if(!req.files){
+//         return res.status(400).send('No files were uploaded.')
+//     }
+//     let fileObj = req.files.docfile;
+//     fileObj.mv("C:\\node\\mednickdb\\nacarat\\server\\mednickFiles\\fileq.txt", function(err){
+//         if(err){
+//             return res.status(500).send(err);
+//         }
+//         else {
+//             res.status(200).send('FileUplaoded!!');
+//         }
+//     })
+// })
 
 // for testing mongo querying ONLY
 // app.get('/documents', function(req, res) {
-    var db = req.db;
-    var collection = db.get('userprofiles');
-    collection.find({},{},function(e,docs){
-        res.json(docs)
-    })
-});
+//     var db = req.db;
+//     var collection = db.get('userprofiles');
+//     collection.find({},{},function(e,docs){
+//         res.json(docs)
+//     })
+// });
 
 // For debugging file metadata ONLY
 // app.post('/documents',function(req,res){
-    var db = req.db;
-    var userName = req.body.username;
-    var userEmail = req.body.email;
-    var reqBody = req.body;
-    var collection = db.get('userprofiles');
-    collection.insert({
-        "username":userName,
-        "email":userEmail
-    }, function (err,doc){
-        if(err){
-            res.status(500).json(reqBody);
-        }
-        else{
-            res.status(200).json(reqBody);
-        }
-    });
-});
+//     var db = req.db;
+//     var userName = req.body.username;
+//     var userEmail = req.body.email;
+//     var reqBody = req.body;
+//     var collection = db.get('userprofiles');
+//     collection.insert({
+//         "username":userName,
+//         "email":userEmail
+//     }, function (err,doc){
+//         if(err){
+//             res.status(500).json(reqBody);
+//         }
+//         else{
+//             res.status(200).json(reqBody);
+//         }
+//     });
+// });
 
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));

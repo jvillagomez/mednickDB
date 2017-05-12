@@ -8,7 +8,7 @@
     DocumentsService.$inject = ['$resource', 'MednickConfig'];
 
     function DocumentsService($resource, MednickConfig) {
-        return $resource(MednickConfig.apiUrl + '/cabinet/', {}, {
+        return $resource(MednickConfig.apiUrl + '/incompleteUpload/', {}, {
             'save': {
                 method: 'POST',
                 transformRequest: function(data) {

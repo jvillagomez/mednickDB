@@ -14,7 +14,7 @@
             'Documents'
         ])
         .constant('MednickConfig', {
-            apiUrl: 'http://127.0.0.1:8000'
+            apiUrl: 'http://127.0.0.1:8001'
         })
         .config(function($mdThemingProvider, $httpProvider, $resourceProvider) {
 

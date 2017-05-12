@@ -49,9 +49,16 @@ gulp.task('bower', ['bower:copy'], function() {
 //****** Run Express server ******//
 //*******************************//
 
+gulp.task('serveMongo', function() {
+    console.log("Starting Mongo DB...");
+    run('start cmd /K mongod').exec();
+    return console.log('MongoDB is online')
+})
+
 gulp.task('serveExpress', function() {
     console.log("Starting Express server...");
     run('start cmd /K node ../server/server.js').exec();
+    // run('start cmd /K cd ../server/mongod').exec();
     return console.log('API is online')
 })
 

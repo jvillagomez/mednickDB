@@ -123,6 +123,8 @@ app.post('/completeUpload',function(req,res){
         });
     }
 
+    var collection = db.get('fileuploads');
+
     fileObj.mv(filePath, function(err){
         console.log(filePath);
         if(err){
@@ -132,33 +134,32 @@ app.post('/completeUpload',function(req,res){
         }
         else {
             console.log("hits pass in upload")
-            res.status(200).send('FileUplaoded!!');
+            // res.status(200).send('FileUplaoded!!');
+            collection.insert({
+                "filename":fileName,
+                "study":study,
+                "subject":subject,
+                "visit":visit,
+                "session":session,
+                "doctype":docType,
+                "filepath":filePath,
+                "notes":notes,
+                "complete":true,
+                "dateUploaded":dateUploaded,
+                "expired":expired,
+                // "expiredDate":expiredDate
+            }, function (err,doc){
+                if(err){
+                    console.log("hits err in DB insert")
+                    return res.status(500).json(req.body);
+                }
+                else {
+                    console.log("hits pass in DB insert")
+                    return res.status(200).json(req.body);
+                }
+            });
         }
     })
-    var collection = db.get('fileuploads');
-    collection.insert({
-        "filename":fileName,
-        "study":study,
-        "subject":subject,
-        "visit":visit,
-        "session":session,
-        "doctype":docType,
-        "filepath":filePath,
-        "notes":notes,
-        "complete":true,
-        "dateUploaded":dateUploaded,
-        "expired":expired,
-        // "expiredDate":expiredDate
-    }, function (err,doc){
-        if(err){
-            console.log("hits err in DB insert")
-            return res.status(500).json(req.body);
-        }
-        else {
-            console.log("hits pass in DB insert")
-            return res.status(200).json(req.body);
-        }
-    });
 });
 
 

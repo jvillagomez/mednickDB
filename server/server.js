@@ -9,6 +9,7 @@
 // Download files
 // Create files from DB objects
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 var express = require('express');
 var router = express.Router();
 var fileUpload = require('express-fileupload');
@@ -99,8 +100,6 @@ app.post('/completeUpload',function(req,res){
         return res.status(400).send('No files were uploaded.')
     }
 
-    console.log(req.files);
-
     let fileObj = req.files.docfile;
     var fileName = req.body.name; //including file extension
     var study = req.body.study;
@@ -108,21 +107,31 @@ app.post('/completeUpload',function(req,res){
     var visit = req.body.visit;
     var session = req.body.session;
     var docType = req.body.filetype;
-    var filePath = path.join(uploadTo,study,visit,session,subject,docType,fileName);
+    var fileDir = path.join(uploadTo,study,visit,session,subject,docType);
+    var filePath = path.join(fileDir,fileName);
     var notes = !(req.body.notes).trim() ? "N/A" : req.body.notes;
     var dateUploaded = req.body.dateuploaded;
     var expired = false;
 
+    console.log(fileDir);
+
+    if (!fs.existsSync(fileDir)){
+        console.log('Dir does not exist yet');
+        mkdirp.sync(fileDir, function (err) {
+            if (err) console.error(err)
+            else console.log('dir created')
+        });
+    }
+
     fileObj.mv(filePath, function(err){
         console.log(filePath);
         if(err){
-            console.log("hits if")
-            console.log(err);
+            console.log("hits err in file upload")
             // console.log(err);
             return res.status(500).send(err);
         }
         else {
-            console.log("hits else")
+            console.log("hits pass in upload")
             res.status(200).send('FileUplaoded!!');
         }
     })
@@ -142,11 +151,11 @@ app.post('/completeUpload',function(req,res){
         // "expiredDate":expiredDate
     }, function (err,doc){
         if(err){
-            // console.log("hits if")
+            console.log("hits err in DB insert")
             return res.status(500).json(req.body);
         }
         else {
-            // console.log("hits else")
+            console.log("hits pass in DB insert")
             return res.status(200).json(req.body);
         }
     });

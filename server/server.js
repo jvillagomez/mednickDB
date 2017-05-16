@@ -42,6 +42,9 @@ app.use(function(req,res,next){
 
 // TODO implement the following incomeplete ENDPOINT for multiple docs use
 // Incomplete Metadata DONE
+
+// START [Uploading files]
+// ==================================================
 app.post('/incompleteUpload',function(req,res){
     // if(!req.files){
     //     console.log("not detecting files")
@@ -99,7 +102,6 @@ app.post('/incompleteUpload',function(req,res){
     })
 });
 
-// Complete Metadata DONE
 app.post('/completeUpload',function(req,res){
     if(!req.files){
         return res.status(400).send('No files were uploaded.')
@@ -166,41 +168,85 @@ app.post('/completeUpload',function(req,res){
         }
     })
 });
+// ==================================================
+// END [Uploading Files]
 
+// START [Uploading files]
+// ==================================================
+app.get('/getFiles',function(req,res){
+    var collection = db.get('fileuploads')
+    var study = req.query.study
+    var visit = req.query.visit
+    var session = req.query.session
+    var doctype = req.query.doctype
 
+    if(!study && !doctype){
+        collection.find({}).then((docs) => {
+            console.log(docs);
+        })
+    }else if (!study && doctype) {
+
+    }else if (study && !doctype) {
+
+    }else if (study && doctype) {
+
+    }
+
+    collection.find({study:study,visit:visit,session:session,doctype:doctype}, 'study').then((docs) => {
+        console.log(docs);
+      // only the name field will be selected
+    })
+})
+// ==================================================
+// END [Uploading Files]
+
+// START [FOR DROPDOWNS]
+// ==================================================
 app.get('/getStudies', function(req,res){
     var collection = db.get('fileuploads');
-
     // collection.find({},)
-    collection.find({}, 'study').then((docs) => {
-        console.log(docs);
-      // only the name field will be selected
-    })
-    collection.distinct('study',{s:1}).then((docs) => {
-        console.log(docs);
-      // only the name field will be selected
-    })
-    // var cursor = collection.find({}).count()
-    // console.log(cursor);
-    // cursor.each()
-    // db.fileUploads.find().toArray(function(err, results) {
-    //     if(err){
-    //         return res.status(500).json(req.body)
-    //     }
-    //     console.log(results)
-    //   // send HTML file populated with quotes here
+    // collection.find({}, 'study').then((docs) => {
+    //     console.log(docs);
+    //   // only the name field will be selected
     // })
-    //
-
-
-
-    res.send("aye there")
-
-    // return res.status(200).json(req.body);
-
+    collection.distinct('study').then((docs) => {
+        console.log(docs);
+        res.json(docs)
+      // only the name field will be selected
+    })
     // TODO THIS BELOW IS THE GOAL FOR BEN
     // api/users?id=4&token=sdfa3&geo=us
 });
+
+app.get('/getVisits', function(req,res){
+    var collection = de.get('fileuploads')
+    var study = req.query.study
+    console.log(study);
+
+    collection.distinct('visit',{study:study}).then((docs) => {
+        console.log(docs);
+        res.json(docs)
+    })
+})
+
+app.get('/getSessions', function(req,res){
+    var collection = db.get('fileuploads')
+    var study = req.query.study
+    var visit = req.query.visit
+    console.log(study);
+    console.log(visit);
+
+    collection.distinct('session',{study:study,visit:visit}).then((docs) => {
+        console.log(docs)
+        res.json(docs)
+    })
+})
+// ==================================================
+// END [FOR DROPDOWNS]
+
+
+
+
 
 
 // app.post('/file-upload', function(req, res) {

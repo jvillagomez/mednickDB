@@ -34,6 +34,8 @@ app.use(function(req,res,next){
     req.db = db;
     next();
 });
+// TODO research if less efficeint
+// var collection = db.get('fileuploads');
 // app.get('/', function(req, res) {
 //     res.sendFile(PUBLIC_PATH + '/index.html');
 // });
@@ -62,36 +64,39 @@ app.post('/incompleteUpload',function(req,res){
     // var dateUploaded = req.body.dateuploaded;
     var expired = false;
 
+
     fileObj.mv(filePath, function(err){
         if(err){
+            console.log("Hits error in upload");
             return res.status(500).send(err);
         }
         else {
-            res.status(200).send(fileName+' uploaded');
+            console.log("Hits pass in uplaod");
+            var collection = db.get('fileUploads');
+            // res.status(200).send(fileName+' uploaded');
+            collection.insert({
+                "filename":fileName,
+                "study":study,
+                "subject":subject,
+                "visit":visit,
+                "session":session,
+                "doctype":docType,
+                "filepath":filePath,
+                "notes":notes,
+                "complete":false,
+                // "dateUploaded":dateUploaded,
+                "expired":false,
+                // "expiredDate":expiredDate
+            }, function (err,doc){
+                if(err){
+                    return res.status(500).json(req.body);
+                }
+                else {
+                    return res.status(200).json(req.body);
+                }
+            });
         }
     })
-    var collection = db.get('sleepProfiles');
-    collection.insert({
-        "filename":fileName,
-        "study":study,
-        "subject":subject,
-        "visit":visit,
-        "session":session,
-        "doctype":docType,
-        "filepath":filePath,
-        "notes":notes,
-        "complete":false,
-        // "dateUploaded":dateUploaded,
-        "expired":false,
-        // "expiredDate":expiredDate
-    }, function (err,doc){
-        if(err){
-            return res.status(500).json(req.body);
-        }
-        else {
-            return res.status(200).json(req.body);
-        }
-    });
 });
 
 // Complete Metadata DONE
@@ -123,7 +128,7 @@ app.post('/completeUpload',function(req,res){
         });
     }
 
-    var collection = db.get('fileuploads');
+    var collection = db.get('fileUploads');
 
     fileObj.mv(filePath, function(err){
         console.log(filePath);
@@ -162,6 +167,40 @@ app.post('/completeUpload',function(req,res){
     })
 });
 
+
+app.get('/getStudies', function(req,res){
+    var collection = db.get('fileuploads');
+
+    // collection.find({},)
+    collection.find({}, 'study').then((docs) => {
+        console.log(docs);
+      // only the name field will be selected
+    })
+    collection.distinct('study',{s:1}).then((docs) => {
+        console.log(docs);
+      // only the name field will be selected
+    })
+    // var cursor = collection.find({}).count()
+    // console.log(cursor);
+    // cursor.each()
+    // db.fileUploads.find().toArray(function(err, results) {
+    //     if(err){
+    //         return res.status(500).json(req.body)
+    //     }
+    //     console.log(results)
+    //   // send HTML file populated with quotes here
+    // })
+    //
+
+
+
+    res.send("aye there")
+
+    // return res.status(200).json(req.body);
+
+    // TODO THIS BELOW IS THE GOAL FOR BEN
+    // api/users?id=4&token=sdfa3&geo=us
+});
 
 
 // app.post('/file-upload', function(req, res) {

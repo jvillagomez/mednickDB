@@ -183,19 +183,55 @@ app.get('/getFiles',function(req,res){
     if(!study && !doctype){
         collection.find({}).then((docs) => {
             console.log(docs);
+            res.status(200).json(docs)
         })
-    }else if (!study && doctype) {
-
-    }else if (study && !doctype) {
-
-    }else if (study && doctype) {
-
+    } else if (!study && doctype) {
+        collection.find({doctype:doctype}).then((docs) => {
+            console.log(docs);
+            res.status(200).json(docs)
+        })
+    } else if (study && !doctype) {
+        if(!visit){
+            collection.find({study:study}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        } else if (!session) {
+            collection.find({study:study,visit:visit}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        } else {
+            collection.find({study:study,visit:visit,session:session}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        }
+    } else if (study && doctype) {
+        if(!visit){
+            collection.find({study:study,doctype:doctype}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        } else if (!session) {
+            collection.find({study:study,visit:visit,doctype:doctype}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        } else {
+            collection.find({study:study,visit:visit,session:session,doctype:doctype}).then((docs) => {
+                console.log(docs);
+                res.status(200).json(docs)
+            })
+        }
+    } else {
+        console.log("nothing querried you fairy");
     }
 
-    collection.find({study:study,visit:visit,session:session,doctype:doctype}, 'study').then((docs) => {
-        console.log(docs);
-      // only the name field will be selected
-    })
+    // collection.find({study:study,visit:visit,session:session,doctype:doctype}, 'study').then((docs) => {
+    //     console.log(docs);
+    //   // only the name field will be selected
+    // })
 })
 // ==================================================
 // END [Uploading Files]

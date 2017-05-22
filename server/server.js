@@ -46,9 +46,6 @@ app.use(function(req,res,next){
 // START [Uploading files]
 // ==================================================
 app.post('/incompleteUpload',function(req,res){
-    // if(!req.files){
-    //     console.log("not detecting files")
-    // }
     if(!req.files){
         console.log(req)
         console.log("not detecting files")
@@ -171,7 +168,7 @@ app.post('/completeUpload',function(req,res){
 // ==================================================
 // END [Uploading Files]
 
-// START [Uploading files]
+// START [Querying files]
 // ==================================================
 app.get('/getFiles',function(req,res){
     var collection = db.get('fileuploads')
@@ -181,45 +178,45 @@ app.get('/getFiles',function(req,res){
     var doctype = req.query.doctype
 
     if(!study && !doctype){
-        collection.find({}).then((docs) => {
+        collection.find({complete:true}).then((docs) => {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (!study && doctype) {
-        collection.find({doctype:doctype}).then((docs) => {
+        collection.find({doctype:doctype,complete:true}).then((docs) => {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (study && !doctype) {
         if(!visit){
-            collection.find({study:study}).then((docs) => {
+            collection.find({study:study,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit}).then((docs) => {
+            collection.find({study:study,visit:visit,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         }
     } else if (study && doctype) {
         if(!visit){
-            collection.find({study:study,doctype:doctype}).then((docs) => {
+            collection.find({study:study,doctype:doctype,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,doctype:doctype}).then((docs) => {
+            collection.find({study:study,visit:visit,doctype:doctype,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,doctype:doctype}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:true}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
@@ -233,8 +230,21 @@ app.get('/getFiles',function(req,res){
     //   // only the name field will be selected
     // })
 })
+
+app.get('/getTemp',function(req,res){
+    var collection = db.get('fileuploads')
+
+    collection.find({complete:false}).then((docs) => {
+        console.log(docs);
+        res.status(200).json(docs)
+    })
+})
+
+// app.get('/getfileObject',function(req,res){
+//
+// })
 // ==================================================
-// END [Uploading Files]
+// END [Querying Files]
 
 // START [FOR DROPDOWNS]
 // ==================================================
@@ -302,30 +312,30 @@ app.get('/getSessions', function(req,res){
 // });
 
 // for debugging file uplaods ONLY
-app.post('/upload',function(req,res){
-    if(!req.files){
-        return res.status(400).send('No files were uploaded.')
-    }
-    let fileObj = req.files.docfile;
-    // console.log(req.files.docfile.data);
-    // fs.readFile(req.files.docfile.path, function (err, data) {
-    //   // ...
-    //   var newPath = __dirname + "/uploads/uploadedFileName";
-    //   fs.writeFile(newPath, data, function (err) {
-    //     res.redirect("back");
-    //   });
-    // });
-
-    fileObj.mv("..\\server\\mednickFiles\\fileq.txt", function(err){
-        if(err){
-            console.log(err);
-            return res.status(500).send(err);
-        }
-        else {
-            res.status(200).send('FileUplaoded!!');
-        }
-    })
-})
+// app.post('/upload',function(req,res){
+//     if(!req.files){
+//         return res.status(400).send('No files were uploaded.')
+//     }
+//     let fileObj = req.files.docfile;
+//     // console.log(req.files.docfile.data);
+//     // fs.readFile(req.files.docfile.path, function (err, data) {
+//     //   // ...
+//     //   var newPath = __dirname + "/uploads/uploadedFileName";
+//     //   fs.writeFile(newPath, data, function (err) {
+//     //     res.redirect("back");
+//     //   });
+//     // });
+//
+//     fileObj.mv("..\\server\\mednickFiles\\fileq.txt", function(err){
+//         if(err){
+//             console.log(err);
+//             return res.status(500).send(err);
+//         }
+//         else {
+//             res.status(200).send('FileUplaoded!!');
+//         }
+//     })
+// })
 
 // for testing mongo querying ONLY
 // app.get('/documents', function(req, res) {

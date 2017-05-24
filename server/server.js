@@ -265,7 +265,7 @@ app.get('/getStudies', function(req,res){
 });
 
 app.get('/getVisits', function(req,res){
-    var collection = de.get('fileuploads')
+    var collection = db.get('fileuploads')
     var study = req.query.study
     console.log(study);
 
@@ -290,8 +290,26 @@ app.get('/getSessions', function(req,res){
 // ==================================================
 // END [FOR DROPDOWNS]
 
-
-
+app.get('/file/:id', function (req, res) {
+    // var root = process.cwd();
+    var id = req.params.id;
+    if (!id) {
+        return res.status(500).send('no ID provided')
+    } else {
+        var collection = db.get('fileuploads')
+        collection.find({_id:id}).then((docs) => {
+            var fileName = docs[0].filepath
+            res.sendFile(fileName, function (err) {
+                if (err) {
+                    console.log(err)
+                    return res.status(404).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
+        })
+    }
+});
 
 
 

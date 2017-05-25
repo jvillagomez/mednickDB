@@ -1,10 +1,4 @@
-// Implemented file uplaod, without logging in DB.
-// TODO// Double check to make sure no db objects get created in this process.
-// DONE// Begin logging.
-// Attach angular app to fornt end
-// Set up gulp for myself on server side
-// DONE// Dynamically create path
-// DONE// Create temp location for unfinished docs
+
 // Multiple doc implementation
 // Download files
 // Create files from DB objects
@@ -41,7 +35,6 @@ app.use(function(req,res,next){
 // });
 
 // TODO implement the following incomeplete ENDPOINT for multiple docs use
-// Incomplete Metadata DONE
 
 // START [Uploading files]
 // ==================================================
@@ -165,6 +158,11 @@ app.post('/completeUpload',function(req,res){
         }
     })
 });
+
+app.post('/editUpload',function(req,res){
+
+})
+
 // ==================================================
 // END [Uploading Files]
 
@@ -240,9 +238,69 @@ app.get('/getTemp',function(req,res){
     })
 })
 
-// app.get('/getfileObject',function(req,res){
-//
-// })
+app.get('/file/:id', function (req, res) {
+    // var root = process.cwd();
+    var id = req.params.id;
+    if (!id) {
+        return res.status(500).send('no ID provided')
+    } else {
+        var collection = db.get('fileuploads')
+        collection.find({_id:id}).then((docs) => {
+            var fileName = docs[0].filepath
+            res.sendFile(fileName, function (err) {
+                if (err) {
+                    console.log(err)
+                    return res.status(404).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
+        })
+    }
+});
+
+// TODO GET file info by ID. Once changes are made, POST to same endpoint to expire old and create new.
+app.get('/fileupload/:id', function (req, res) {
+    // var root = process.cwd();
+    var id = req.params.id;
+    if (!id) {
+        return res.status(500).send('no ID provided')
+    } else {
+        var collection = db.get('fileuploads')
+        collection.find({_id:id}).then((docs) => {
+            var fileName = docs[0].filepath
+            res.sendFile(fileName, function (err) {
+                if (err) {
+                    console.log(err)
+                    return res.status(404).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
+        })
+    }
+});
+
+app.post('/fileupload/:id', function (req, res) {
+    // var root = process.cwd();
+    var id = req.params.id;
+    if (!id) {
+        return res.status(500).send('no ID provided')
+    } else {
+        var collection = db.get('fileuploads')
+        collection.find({_id:id}).then((docs) => {
+            var fileName = docs[0].filepath
+            res.sendFile(fileName, function (err) {
+                if (err) {
+                    console.log(err)
+                    return res.status(404).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
+        })
+    }
+});
 // ==================================================
 // END [Querying Files]
 
@@ -289,100 +347,6 @@ app.get('/getSessions', function(req,res){
 })
 // ==================================================
 // END [FOR DROPDOWNS]
-
-app.get('/file/:id', function (req, res) {
-    // var root = process.cwd();
-    var id = req.params.id;
-    if (!id) {
-        return res.status(500).send('no ID provided')
-    } else {
-        var collection = db.get('fileuploads')
-        collection.find({_id:id}).then((docs) => {
-            var fileName = docs[0].filepath
-            res.sendFile(fileName, function (err) {
-                if (err) {
-                    console.log(err)
-                    return res.status(404).send(err);
-                } else {
-                    console.log('Sent:', fileName);
-                }
-            });
-        })
-    }
-});
-
-
-
-// app.post('/file-upload', function(req, res) {
-//     // get the temporary location of the file
-//     var tmp_path = req.files.thumbnail.path;
-//     // set where the file should actually exists - in this case it is in the "images" directory
-//     var target_path = '/public/images/' + req.files.thumbnail.name;
-//     // move the file from the temporary location to the intended location
-//     fs.rename(tmp_path, target_path, function(err) {
-//         if (err) throw err;
-//         // delete the temporary file, so that the explicitly set temporary upload dir does not get filled with unwanted files
-//         fs.unlink(tmp_path, function() {
-//             if (err) throw err;
-//             res.send('File uploaded to: ' + target_path + ' - ' + req.files.thumbnail.size + ' bytes');
-//         });
-//     });
-// });
-
-// for debugging file uplaods ONLY
-// app.post('/upload',function(req,res){
-//     if(!req.files){
-//         return res.status(400).send('No files were uploaded.')
-//     }
-//     let fileObj = req.files.docfile;
-//     // console.log(req.files.docfile.data);
-//     // fs.readFile(req.files.docfile.path, function (err, data) {
-//     //   // ...
-//     //   var newPath = __dirname + "/uploads/uploadedFileName";
-//     //   fs.writeFile(newPath, data, function (err) {
-//     //     res.redirect("back");
-//     //   });
-//     // });
-//
-//     fileObj.mv("..\\server\\mednickFiles\\fileq.txt", function(err){
-//         if(err){
-//             console.log(err);
-//             return res.status(500).send(err);
-//         }
-//         else {
-//             res.status(200).send('FileUplaoded!!');
-//         }
-//     })
-// })
-
-// for testing mongo querying ONLY
-// app.get('/documents', function(req, res) {
-//     var db = req.db;
-//     var collection = db.get('userprofiles');
-//     collection.find({},{},function(e,docs){
-//         res.json(docs)
-//     })
-// });
-
-// For debugging file metadata ONLY
-// app.post('/documents',function(req,res){
-//     var db = req.db;
-//     var userName = req.body.username;
-//     var userEmail = req.body.email;
-//     var reqBody = req.body;
-//     var collection = db.get('userprofiles');
-//     collection.insert({
-//         "username":userName,
-//         "email":userEmail
-//     }, function (err,doc){
-//         if(err){
-//             res.status(500).json(reqBody);
-//         }
-//         else{
-//             res.status(200).json(reqBody);
-//         }
-//     });
-// });
 
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));

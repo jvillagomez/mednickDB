@@ -1,7 +1,7 @@
 
 // Multiple doc implementation
 // Create files from DB objects
-var fs = require('fs');
+ var fs = require('fs');
 var mkdirp = require('mkdirp');
 var express = require('express');
 var router = express.Router();
@@ -35,124 +35,135 @@ app.use(function(req,res,next){
 // START [Uploading files]
 // ==================================================
 app.post('/incompleteUpload',function(req,res){
-    if(!req.files){
-        console.log(req)
-        console.log("not detecting files")
+    var collection = db.get('fileUploads');
+
+    if(!req.files || !req.body.name){
+        console.log("No file was uploaded")
         return res.status(400).send('No files were uploaded.')
+    } else {
+        let fileObj = req.files.docfile;
+        var fileName = req.body.name[0]; //including file extension
+        var study = !(req.body.study).trim() ? "" : req.body.study;
+        var subject = !(req.body.subject).trim() ? "" : req.body.subject;
+        var visit = !(req.body.visit).trim() ? "" : req.body.visit;
+        var session = !(req.body.session).trim() ? "" : req.body.session;
+        var docType = !(req.body.doctype) ? "" : req.body.doctype;
+        var filePath = path.join(uploadTo,'temp',fileName);
+        var notes = !(req.body.notes).trim() ? "" : req.body.notes;
+        var dateUploaded = Date.now();
+        var expired = false;
+
+
+        fileObj.mv(filePath, function(err){
+            if(err){
+                console.log("Error in uploading file");
+                console.log(err);
+                return res.status(500).send(err);
+            }
+            else {
+                console.log("Successfully uploaded file");
+                collection.insert({
+                    "filename":fileName,
+                    "study":study,
+                    "subject":subject,
+                    "visit":visit,
+                    "session":session,
+                    "doctype":docType,
+                    "filepath":filePath,
+                    "notes":notes,
+                    "complete":false,
+                    "dateUploaded":dateUploaded,
+                    "expired":false,
+                    "expiredDate":0
+                }, function (err,doc){
+                    if(err){
+                        console.log("Error inserting record");
+                        console.log(err);
+                        return res.status(500).json(err);
+                    }
+                    else {
+                        console.log("Record insertion was successful");
+                        return res.status(200).json(req.body);
+                    }
+                });
+            }
+        })
     }
-    // TODO think of variableIZING what the values default to according to user. Maybe people doing research need N/A, others none, others an empty string
-    let fileObj = req.files.docfile;
-    var fileName = req.body.name[0]; //including file extension
-    var study = !(req.body.study).trim() ? "" : req.body.study;
-    var subject = !(req.body.subject).trim() ? "" : req.body.subject;
-    var visit = !(req.body.visit).trim() ? "" : req.body.visit;
-    var session = !(req.body.session).trim() ? "" : req.body.session;
-    var docType = !(req.body.doctype) ? "" : req.body.doctype;
-    var filePath = path.join(uploadTo,'temp',fileName);
-    var notes = !(req.body.notes).trim() ? "" : req.body.notes;
-    // var dateUploaded = req.body.dateuploaded;
-    var expired = false;
-
-
-    fileObj.mv(filePath, function(err){
-        if(err){
-            console.log("Hits error in upload");
-            return res.status(500).send(err);
-        }
-        else {
-            console.log("Hits pass in uplaod");
-            var collection = db.get('fileUploads');
-            // res.status(200).send(fileName+' uploaded');
-            collection.insert({
-                "filename":fileName,
-                "study":study,
-                "subject":subject,
-                "visit":visit,
-                "session":session,
-                "doctype":docType,
-                "filepath":filePath,
-                "notes":notes,
-                "complete":false,
-                // "dateUploaded":dateUploaded,
-                "expired":false,
-                // "expiredDate":expiredDate
-            }, function (err,doc){
-                if(err){
-                    return res.status(500).json(req.body);
-                }
-                else {
-                    return res.status(200).json(req.body);
-                }
-            });
-        }
-    })
 });
 
 app.post('/completeUpload',function(req,res){
-    if(!req.files){
-        return res.status(400).send('No files were uploaded.')
-    }
-
-    let fileObj = req.files.docfile;
-    var fileName = req.body.name; //including file extension
-    var study = req.body.study;
-    var subject = req.body.subject;
-    var visit = req.body.visit;
-    var session = req.body.session;
-    var docType = req.body.filetype;
-    var fileDir = path.join(uploadTo,study,visit,session,subject,docType);
-    var filePath = path.join(fileDir,fileName);
-    var notes = !(req.body.notes).trim() ? "N/A" : req.body.notes;
-    var dateUploaded = req.body.dateuploaded;
-    var expired = false;
-
-    console.log(fileDir);
-
-    if (!fs.existsSync(fileDir)){
-        console.log('Dir does not exist yet');
-        mkdirp.sync(fileDir, function (err) {
-            if (err) console.error(err)
-            else console.log('dir created')
-        });
-    }
-
     var collection = db.get('fileUploads');
+    // End callback if no file was chosen
+    if(!req.files || !req.body.name){
+        return res.status(400).send('No files were uploaded.')
+    } else {
+        // End callback if a single filed is missing
+        if(!req.body.study || !req.body.subject || !req.body.visit || !req.body.session || !req.body.filetype){
+            return res.status(400).send("Missing Fields. Use '/incompleteUpload' endpoint instead.")
+        } else {
+            let fileObj = req.files.docfile;
+            var fileName = req.body.name; //including file extension
+            var study = req.body.study;
+            var subject = req.body.subject;
+            var visit = req.body.visit;
+            var session = req.body.session;
+            var docType = req.body.filetype;
+            var fileDir = path.join(uploadTo,study,visit,session,subject,docType);// fileDir was created to chekc if directory exists, before uploading file.
+            var filePath = path.join(fileDir,fileName);
+            var notes = !(req.body.notes).trim() ? "" : req.body.notes;
+            var dateUploaded = Date.now();
 
-    fileObj.mv(filePath, function(err){
-        console.log(filePath);
-        if(err){
-            console.log("hits err in file upload")
-            // console.log(err);
-            return res.status(500).send(err);
-        }
-        else {
-            console.log("hits pass in upload")
-            // res.status(200).send('FileUplaoded!!');
-            collection.insert({
-                "filename":fileName,
-                "study":study,
-                "subject":subject,
-                "visit":visit,
-                "session":session,
-                "doctype":docType,
-                "filepath":filePath,
-                "notes":notes,
-                "complete":true,
-                "dateUploaded":dateUploaded,
-                "expired":expired,
-                // "expiredDate":expiredDate
-            }, function (err,doc){
+            if (!fs.existsSync(fileDir)){
+                console.log('Dir does not exist yet');
+                mkdirp.sync(fileDir, function (err) {
+                    if (err){
+                        console.log('Error creating fileDir')
+                        console.error(err)
+                        return res.status(500).send(err);
+
+                    } else {
+                        console.log('fileDir created successfully')
+                        console.log(fileDir)
+                    }
+                });
+            }
+
+            fileObj.mv(filePath, function(err){
+                console.log(filePath);
                 if(err){
-                    console.log("hits err in DB insert")
-                    return res.status(500).json(req.body);
+                    console.log("Error in file upload");
+                    console.log(err);
+                    return res.status(500).send(err);
                 }
                 else {
-                    console.log("hits pass in DB insert")
-                    return res.status(200).json(req.body);
+                    console.log("File successfully moved");
+                    collection.insert({
+                        "filename":fileName,
+                        "study":study,
+                        "subject":subject,
+                        "visit":visit,
+                        "session":session,
+                        "doctype":docType,
+                        "filepath":filePath,
+                        "notes":notes,
+                        "complete":true,
+                        "dateUploaded":dateUploaded,
+                        "expired":false,
+                        "expiredDate":0
+                    }, function (err,doc){
+                        if(err){
+                            console.log("Error in DB insert")
+                            return res.status(500).json(req.body);
+                        }
+                        else {
+                            console.log("DB insertion successful")
+                            return res.status(200).json(req.body);
+                        }
+                    });
                 }
-            });
+            })
         }
-    })
+    }
 });
 // ==================================================
 // END [Uploading Files]
@@ -160,11 +171,11 @@ app.post('/completeUpload',function(req,res){
 // START [Querying files]
 // ==================================================
 app.get('/getFiles',function(req,res){
-    var collection = db.get('fileuploads')
-    var study = req.query.study
-    var visit = req.query.visit
-    var session = req.query.session
-    var doctype = req.query.doctype
+    var collection = db.get('fileuploads');
+    var study = req.query.study;
+    var visit = req.query.visit;
+    var session = req.query.session;
+    var doctype = req.query.doctype;
 
     if(!study && !doctype){
         collection.find({complete:true,expired:false}).then((docs) => {
@@ -211,7 +222,7 @@ app.get('/getFiles',function(req,res){
             })
         }
     } else {
-        console.log("nothing querried you fairy");
+        console.log("If youre seeing this somthing is completely fucked up in the request :)");
     }
 
     // collection.find({study:study,visit:visit,session:session,doctype:doctype}, 'study').then((docs) => {
@@ -221,7 +232,7 @@ app.get('/getFiles',function(req,res){
 })
 
 app.get('/getTemp',function(req,res){
-    var collection = db.get('fileuploads')
+    var collection = db.get('fileuploads');
 
     collection.find({complete:false,expired:false}).then((docs) => {
         console.log(docs);
@@ -230,20 +241,25 @@ app.get('/getTemp',function(req,res){
 })
 
 app.get('/file/:id', function (req, res) {
-    // var root = process.cwd();
+    var collection = db.get('fileuploads')
     var id = req.params.id;
     if (!id) {
-        return res.status(500).send('no ID provided')
+        console.log("No Document ID was provided");
+        return res.status(500).send('No Doc ID provided')
     } else {
-        var collection = db.get('fileuploads')
         collection.find({_id:id,expired:false}).then((docs) => {
+            console.log("If no filepath printed below, theres an error.");
             var fileName = docs[0].filepath
+            console.log("filename:",fileName);
             res.sendFile(fileName, function (err) {
                 if (err) {
+                    console.log("Error serving file object");
                     console.log(err)
                     return res.status(404).send(err);
                 } else {
                     console.log('Sent:', fileName);
+                    // Delete below line if giving you shit or not serving file; shit worked in postman
+                    return res.status(200).send("File was served successfully");
                 }
             });
         })
@@ -251,7 +267,7 @@ app.get('/file/:id', function (req, res) {
 });
 // ==================================================
 // END [Querying Files]
-
+// =============================================================================
 // START [Edit file]
 // ==================================================
 app.get('/editUpload/:id', function (req, res) {
@@ -292,7 +308,7 @@ app.post('/fileupload/:id', function (req, res) {
 // ==================================================
 // END [Edit file]
 
-// START [FOR DROPDOWNS]
+// START [DROPDOWN Selections]
 // ==================================================
 app.get('/getStudies', function(req,res){
     var collection = db.get('fileuploads');
@@ -334,7 +350,7 @@ app.get('/getSessions', function(req,res){
     })
 })
 // ==================================================
-// END [FOR DROPDOWNS]
+// END [DROPDOWN Selections]
 
 // ==============================================================
 // START [server instance]

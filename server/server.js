@@ -159,10 +159,6 @@ app.post('/completeUpload',function(req,res){
     })
 });
 
-app.post('/editUpload',function(req,res){
-
-})
-
 // ==================================================
 // END [Uploading Files]
 
@@ -176,45 +172,45 @@ app.get('/getFiles',function(req,res){
     var doctype = req.query.doctype
 
     if(!study && !doctype){
-        collection.find({complete:true}).then((docs) => {
+        collection.find({complete:true,expired:false}).then((docs) => {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (!study && doctype) {
-        collection.find({doctype:doctype,complete:true}).then((docs) => {
+        collection.find({doctype:doctype,complete:true,expired:false}).then((docs) => {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (study && !doctype) {
         if(!visit){
-            collection.find({study:study,complete:true}).then((docs) => {
+            collection.find({study:study,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,complete:true}).then((docs) => {
+            collection.find({study:study,visit:visit,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,complete:true}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         }
     } else if (study && doctype) {
         if(!visit){
-            collection.find({study:study,doctype:doctype,complete:true}).then((docs) => {
+            collection.find({study:study,doctype:doctype,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,doctype:doctype,complete:true}).then((docs) => {
+            collection.find({study:study,visit:visit,doctype:doctype,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:true}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:true,expired:false}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
@@ -232,7 +228,7 @@ app.get('/getFiles',function(req,res){
 app.get('/getTemp',function(req,res){
     var collection = db.get('fileuploads')
 
-    collection.find({complete:false}).then((docs) => {
+    collection.find({complete:false,expired:false}).then((docs) => {
         console.log(docs);
         res.status(200).json(docs)
     })
@@ -245,7 +241,7 @@ app.get('/file/:id', function (req, res) {
         return res.status(500).send('no ID provided')
     } else {
         var collection = db.get('fileuploads')
-        collection.find({_id:id}).then((docs) => {
+        collection.find({_id:id,expired:false}).then((docs) => {
             var fileName = docs[0].filepath
             res.sendFile(fileName, function (err) {
                 if (err) {
@@ -260,23 +256,18 @@ app.get('/file/:id', function (req, res) {
 });
 
 // TODO GET file info by ID. Once changes are made, POST to same endpoint to expire old and create new.
-app.get('/fileupload/:id', function (req, res) {
+app.get('/editUpload/:id', function (req, res) {
     // var root = process.cwd();
     var id = req.params.id;
     if (!id) {
+        console.log("NO ID PROVIDED");
+        // TODO switch response code for error
         return res.status(500).send('no ID provided')
     } else {
         var collection = db.get('fileuploads')
-        collection.find({_id:id}).then((docs) => {
-            var fileName = docs[0].filepath
-            res.sendFile(fileName, function (err) {
-                if (err) {
-                    console.log(err)
-                    return res.status(404).send(err);
-                } else {
-                    console.log('Sent:', fileName);
-                }
-            });
+        collection.find({_id:id,expired:false}).then((docs) => {
+            var docMetadata = docs[0]
+            res.status(200).json(docMetadata)
         })
     }
 });
@@ -288,16 +279,15 @@ app.post('/fileupload/:id', function (req, res) {
         return res.status(500).send('no ID provided')
     } else {
         var collection = db.get('fileuploads')
-        collection.find({_id:id}).then((docs) => {
-            var fileName = docs[0].filepath
-            res.sendFile(fileName, function (err) {
-                if (err) {
-                    console.log(err)
-                    return res.status(404).send(err);
-                } else {
-                    console.log('Sent:', fileName);
-                }
-            });
+        collection.update({_id:id,expired:false},{expired:true}).then((docs) => {
+            if(err){
+                console.log("hits err in DB update")
+                return res.status(500).json(req.body);
+            }
+            else {
+                console.log("hits pass in DB update")
+                return res.status(200).json(req.body);
+            }
         })
     }
 });

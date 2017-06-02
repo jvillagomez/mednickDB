@@ -267,47 +267,50 @@ app.get('/file/:id', function (req, res) {
 });
 // ==================================================
 // END [Querying Files]
-// =============================================================================
+
 // START [Edit file]
 // ==================================================
 app.get('/editUpload/:id', function (req, res) {
-    // var root = process.cwd();
+    var collection = db.get('fileuploads')
+
     var id = req.params.id;
     if (!id) {
-        console.log("NO ID PROVIDED");
-        // TODO switch response code for error
-        return res.status(500).send('no ID provided')
+        console.log("No document ID provided");
+        return res.status(500).send('No document ID provided')
     } else {
-        var collection = db.get('fileuploads')
         collection.find({_id:id,expired:false}).then((docs) => {
-            var docMetadata = docs[0]
-            res.status(200).json(docMetadata)
-        })
+            var data = docs[0]
+            console.log(data);
+            // if error erase teh return keyword below
+            return res.status(200).json(data)
+        });
     }
 });
 
 app.post('/fileupload/:id', function (req, res) {
-    // var root = process.cwd();
+    var collection = db.get('fileuploads')
+
     var id = req.params.id;
     if (!id) {
-        return res.status(500).send('no ID provided')
+        console.log("No Document ID provided");
+        return res.status(500).send('No document ID provided')
     } else {
-        var collection = db.get('fileuploads')
-        collection.update({_id:id,expired:false},{expired:true}).then((docs) => {
+        collection.update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
             if(err){
-                console.log("hits err in DB update")
-                return res.status(500).json(req.body);
+                console.log("Error updating document record")
+                console.log(err);
+                return res.status(500).json(err);
             }
             else {
-                console.log("hits pass in DB update")
+                console.log("Record was updated accordingly")
                 return res.status(200).json(req.body);
             }
-        })
+        });
     }
 });
 // ==================================================
 // END [Edit file]
-
+// =============================================================================
 // START [DROPDOWN Selections]
 // ==================================================
 app.get('/getStudies', function(req,res){

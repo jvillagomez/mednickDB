@@ -1,6 +1,5 @@
 
 // Multiple doc implementation
-// Download files
 // Create files from DB objects
 var fs = require('fs');
 var mkdirp = require('mkdirp');
@@ -14,12 +13,11 @@ var monk = require('monk');
 var db = monk('localhost:27017/mednick');
 var app = express();
 var uploadTo = "c:\\mednick\\server\\mednickFiles"
-
-
+// ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
 app.set('port', (process.env.PORT || 8001));
-
+// ==============================================================
 app.use('/public', express.static(PUBLIC_PATH));
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
@@ -28,13 +26,11 @@ app.use(function(req,res,next){
     req.db = db;
     next();
 });
-// TODO research if less efficeint
+// ==============================================================
 // var collection = db.get('fileuploads');
 // app.get('/', function(req, res) {
 //     res.sendFile(PUBLIC_PATH + '/index.html');
 // });
-
-// TODO implement the following incomeplete ENDPOINT for multiple docs use
 
 // START [Uploading files]
 // ==================================================
@@ -158,7 +154,6 @@ app.post('/completeUpload',function(req,res){
         }
     })
 });
-
 // ==================================================
 // END [Uploading Files]
 
@@ -254,8 +249,11 @@ app.get('/file/:id', function (req, res) {
         })
     }
 });
+// ==================================================
+// END [Querying Files]
 
-// TODO GET file info by ID. Once changes are made, POST to same endpoint to expire old and create new.
+// START [Edit file]
+// ==================================================
 app.get('/editUpload/:id', function (req, res) {
     // var root = process.cwd();
     var id = req.params.id;
@@ -292,7 +290,7 @@ app.post('/fileupload/:id', function (req, res) {
     }
 });
 // ==================================================
-// END [Querying Files]
+// END [Edit file]
 
 // START [FOR DROPDOWNS]
 // ==================================================
@@ -338,6 +336,8 @@ app.get('/getSessions', function(req,res){
 // ==================================================
 // END [FOR DROPDOWNS]
 
+// ==============================================================
+// START [server instance]
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));
 });

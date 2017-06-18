@@ -1,0 +1,33 @@
+{
+  "name": "MEAN",
+  "version": "1.0.0",
+  "description": "App for streamlined data collection in sleep studies.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jvillagomez/mednick.git"
+  },
+  "keywords": [
+    "MEAN",
+    "Express",
+    "Angular"
+  ],
+  "author": "Juan Antonio Villlagomez",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/jvillagomez/mednick/issues"
+  },
+  "homepage": "https://github.com/jvillagomez/mednick",
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "express": "^4.15.2",
+    "express-fileupload": "^0.1.3",
+    "body-parser": "^1.17.1",
+    "mongodb": "^2.2.26",
+    "monk": "^4.0.0"
+  }
+}

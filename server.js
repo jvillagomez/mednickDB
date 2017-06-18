@@ -1,7 +1,4 @@
-
-// Multiple doc implementation
-// Create files from DB objects
- var fs = require('fs');
+var fs = require('fs');
 var mkdirp = require('mkdirp');
 var express = require('express');
 var router = express.Router();
@@ -10,9 +7,9 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('localhost:27017/mednick');
+// var db = monk('localhost:27017/mednick');
 var app = express();
-var uploadTo = "c:\\mednick\\server\\mednickFiles"
+var uploadTo = "\\mednickFiles"
 // ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
@@ -26,12 +23,40 @@ app.use(function(req,res,next){
     req.db = db;
     next();
 });
-// ==============================================================
-// var collection = db.get('fileuploads');
-// app.get('/', function(req, res) {
-//     res.sendFile(PUBLIC_PATH + '/index.html');
-// });
 
+// ============================================================================
+
+// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
+var db;
+
+// Connect to the database before starting the application server.
+mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+  if (err) {
+    console.log(err);
+    process.exit(1);
+  }
+
+  // Save database object from the callback for reuse.
+  db = database;
+  console.log("Database connection ready");
+
+  // Initialize the app.
+  var server = app.listen(process.env.PORT || 8080, function () {
+    var port = server.address().port;
+    console.log("App now running on port", port);
+  });
+});
+
+// CONTACTS API ROUTES BELOW
+
+// Generic error handler used by all endpoints.
+function handleError(res, reason, message, code) {
+  console.log("ERROR: " + reason);
+  res.status(code || 500).json({"error": message});
+}
+// ============================================================================
+
+// ==============================================================
 // START [Uploading files]
 // ==================================================
 app.post('/incompleteUpload',function(req,res){
@@ -357,6 +382,6 @@ app.get('/getSessions', function(req,res){
 
 // ==============================================================
 // START [server instance]
-app.listen(app.get('port'), function() {
-    console.log('Node app is running on port', app.get('port'));
-});
+// app.listen(app.get('port'), function() {
+//     console.log('Node app is running on port', app.get('port'));
+// });

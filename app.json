@@ -1,0 +1,8 @@
+{
+  "name": "Mednick Database",
+  "description": "App for streamlined data collection in sleep studies.",
+  "repository": "https://github.com/jvillagomez/mednick.git",
+  "logo": "",
+  "keywords": ["node", "express", "angular", "MEAN", "mongodb", "REST", "API"],
+  "addons": ["mongolab"]
+}

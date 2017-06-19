@@ -9,10 +9,20 @@ var mongo = require('mongodb');
 var monk = require('monk');
 // var db = monk('localhost:27017/mednick');
 var app = express();
-var uploadTo = "\\mednickFiles"
+
+var CWD = process.cwd();
+
+var UPLOAD_TO = path.join(CWD,"mednickFiles")
 // ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
+// var MONGODB_URI = "mongodb://user1:Pass1234@ds123312.mlab.com:23312/mednick"
+
+var SLEEPSCORES_COLLECTION = "sleepScores"
+var SLEEPDIARIES_COLLECTION = "sleepDiaries"
+var SCREENINGS_COLLECTION = "screenings"
+var FILEUPLOADS_COLLECTION = "fileuploads";
+
 app.set('port', (process.env.PORT || 8001));
 // ==============================================================
 app.use('/public', express.static(PUBLIC_PATH));
@@ -24,13 +34,15 @@ app.use(function(req,res,next){
     next();
 });
 
+
 // ============================================================================
 
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
 
 // Connect to the database before starting the application server.
-mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+mongo.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+// mongo.MongoClient.connect(MONGODB_URI, function (err, database) {
   if (err) {
     console.log(err);
     process.exit(1);
@@ -117,7 +129,7 @@ app.post('/incompleteUpload',function(req,res){
 });
 
 app.post('/completeUpload',function(req,res){
-    var collection = db.get('fileUploads');
+    // var collection = db.get('fileUploads');
     // End callback if no file was chosen
     if(!req.files || !req.body.name){
         return res.status(400).send('No files were uploaded.')
@@ -133,7 +145,8 @@ app.post('/completeUpload',function(req,res){
             var visit = req.body.visit;
             var session = req.body.session;
             var docType = req.body.filetype;
-            var fileDir = path.join(uploadTo,study,visit,session,subject,docType);// fileDir was created to chekc if directory exists, before uploading file.
+            var fileDir = path.join(UPLOAD_TO,study,visit,session,subject,docType);// fileDir was created to chekc if directory exists, before uploading file.
+            console.log(fileDir);
             var filePath = path.join(fileDir,fileName);
             var notes = !(req.body.notes).trim() ? "" : req.body.notes;
             var dateUploaded = Date.now();
@@ -162,7 +175,7 @@ app.post('/completeUpload',function(req,res){
                 }
                 else {
                     console.log("File successfully moved");
-                    collection.insert({
+                    db.collection(FILEUPLOADS_COLLECTION).insert({
                         "filename":fileName,
                         "study":study,
                         "subject":subject,
@@ -177,10 +190,10 @@ app.post('/completeUpload',function(req,res){
                         "expiredDate":0
                     }, function (err,doc){
                         if(err){
-                            console.log("Error in DB insert")
-                            return res.status(500).json(req.body);
+                            handleError(res, err.message, "Failed to Upload complete document.");
                         }
                         else {
+                            path.resolve(process.env.PWD);
                             console.log("DB insertion successful")
                             return res.status(200).json(req.body);
                         }
@@ -196,17 +209,21 @@ app.post('/completeUpload',function(req,res){
 // START [Querying files]
 // ==================================================
 app.get('/getFiles',function(req,res){
-    var collection = db.get('fileuploads');
+    // var collection = db.get('fileuploads');
     var study = req.query.study;
     var visit = req.query.visit;
     var session = req.query.session;
     var doctype = req.query.doctype;
 
     if(!study && !doctype){
-        collection.find({complete:true,expired:false}).then((docs) => {
-            console.log(docs);
-            res.status(200).json(docs)
-        })
+        db.collection(FILEUPLOADS_COLLECTION).find({complete:true,expired:false}).toArray(function(err,docs){
+            if (err) {
+              handleError(res, err.message, "Failed to get contacts.");
+            } else {
+              res.status(200).json(docs);
+            }
+        });
+
     } else if (!study && doctype) {
         collection.find({doctype:doctype,complete:true,expired:false}).then((docs) => {
             console.log(docs);

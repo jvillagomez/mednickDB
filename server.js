@@ -21,7 +21,7 @@ var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
 var SLEEPSCORES_COLLECTION = "sleepScores"
 var SLEEPDIARIES_COLLECTION = "sleepDiaries"
 var SCREENINGS_COLLECTION = "screenings"
-var FILEUPLOADS_COLLECTION = "fileuploads";
+var FILEUPLOADS_COLLECTION = "fileUploads";
 
 app.set('port', (process.env.PORT || 8001));
 // ==============================================================

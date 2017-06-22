@@ -7,6 +7,8 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var monk = require('monk');
+var cors = require('cors');
+
 // var db = monk('localhost:27017/mednick');
 var app = express();
 
@@ -16,7 +18,7 @@ var UPLOAD_TO = path.join(CWD,"mednickFiles")
 // ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
-// var MONGODB_URI = "mongodb://user1:Pass1234@ds123312.mlab.com:23312/mednick"
+var MONGODB_URI = "mongodb://user1:Pass1234@ds123312.mlab.com:23312/mednick"
 
 var SLEEPSCORES_COLLECTION = "sleepScores"
 var SLEEPDIARIES_COLLECTION = "sleepDiaries"
@@ -29,6 +31,8 @@ app.use('/public', express.static(PUBLIC_PATH));
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
+app.use(cors());
+
 app.use(function(req,res,next){
     req.db = db;
     next();
@@ -41,8 +45,8 @@ app.use(function(req,res,next){
 var db;
 
 // Connect to the database before starting the application server.
-mongo.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
-// mongo.MongoClient.connect(MONGODB_URI, function (err, database) {
+// mongo.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
+mongo.MongoClient.connect(MONGODB_URI, function (err, database) {
   if (err) {
     console.log(err);
     process.exit(1);
@@ -53,78 +57,106 @@ mongo.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
   console.log("Database connection ready");
 
   // Initialize the app.
-  var server = app.listen(process.env.PORT || 8080, function () {
+  // var server = app.listen(process.env.PORT || 8080, function () {
+  var server = app.listen(process.env.PORT || 8001, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
   });
 });
-
-// CONTACTS API ROUTES BELOW
 
 // Generic error handler used by all endpoints.
 function handleError(res, reason, message, code) {
   console.log("ERROR: " + reason);
   res.status(code || 500).json({"error": message});
 }
+
+function insertDocument(collection_name,record) {
+    // record ADD COMPLETENESS AT END POINT
+    // Check dictionary for any empy strings as values
+    record.dateUploaded = Date.now();
+    record.uploadedBy = "JoeSchmoe";
+    db.collection(collection_name).insert(record, function (err,doc){
+        if(err){
+            handleError(res, err.message, err,"Document was not inserted!");
+        }
+        else {
+            res.status(201).json(doc);
+        }
+    });
+}
+
+function uploadFile(){
+
+}
+
+function uploadSleepFile(){
+
+}
+
 // ============================================================================
 
 // ==============================================================
 // START [Uploading files]
 // ==================================================
 app.post('/incompleteUpload',function(req,res){
-    var collection = db.get('fileUploads');
-
     if(!req.files || !req.body.name){
         console.log("No file was uploaded")
         return res.status(400).send('No files were uploaded.')
     } else {
-        let fileObj = req.files.docfile;
-        var fileName = req.body.name[0]; //including file extension
-        var study = !(req.body.study).trim() ? "" : req.body.study;
-        var subject = !(req.body.subject).trim() ? "" : req.body.subject;
-        var visit = !(req.body.visit).trim() ? "" : req.body.visit;
-        var session = !(req.body.session).trim() ? "" : req.body.session;
-        var docType = !(req.body.doctype) ? "" : req.body.doctype;
-        var filePath = path.join(uploadTo,'temp',fileName);
-        var notes = !(req.body.notes).trim() ? "" : req.body.notes;
-        var dateUploaded = Date.now();
-        var expired = false;
+        var crip = req.body
+        crip.date = "crip niggaz"
+        console.log(crip);
+        console.log(typeof crip);
 
-
-        fileObj.mv(filePath, function(err){
-            if(err){
-                console.log("Error in uploading file");
-                console.log(err);
-                return res.status(500).send(err);
-            }
-            else {
-                console.log("Successfully uploaded file");
-                collection.insert({
-                    "filename":fileName,
-                    "study":study,
-                    "subject":subject,
-                    "visit":visit,
-                    "session":session,
-                    "doctype":docType,
-                    "filepath":filePath,
-                    "notes":notes,
-                    "complete":false,
-                    "dateUploaded":dateUploaded,
-                    "expired":false,
-                    "expiredDate":0
-                }, function (err,doc){
-                    if(err){
-                        console.log("Error inserting record");
-                        console.log(err);
-                        return res.status(500).json(err);
-                    }
-                    else {
-                        console.log("Record insertion was successful");
-                        return res.status(200).json(req.body);
-                    }
-                });
-            }
-        })
+        console.log(req.files.docfile);
+        console.log(typeof req.files.docfile);
+        // let fileObj = req.files.docfile;
+        // var fileName = req.body.name[0]; //including file extension
+        // var study = !(req.body.study).trim() ? "" : req.body.study;
+        // var subject = !(req.body.subject).trim() ? "" : req.body.subject;
+        // var visit = !(req.body.visit).trim() ? "" : req.body.visit;
+        // var session = !(req.body.session).trim() ? "" : req.body.session;
+        // var docType = !(req.body.doctype) ? "" : req.body.doctype;
+        // var filePath = path.join(UPLOAD_TO,'temp',fileName);
+        // var notes = !(req.body.notes).trim() ? "" : req.body.notes;
+        // var dateUploaded = Date.now();
+        // var expired = false;
+        //
+        //
+        // fileObj.mv(filePath, function(err){
+        //     if(err){
+        //         console.log("Error in uploading file");
+        //         console.log(err);
+        //         return res.status(500).send(err);
+        //     }
+        //     else {
+        //         console.log("Successfully uploaded file");
+        //         db.collection(FILEUPLOADS_COLLECTION).insert({
+        //             "filename":fileName,
+        //             "study":study,
+        //             "subject":subject,
+        //             "visit":visit,
+        //             "session":session,
+        //             "doctype":docType,
+        //             "filepath":filePath,
+        //             "notes":notes,
+        //             "complete":false,
+        //             "dateUploaded":dateUploaded,
+        //             "expired":false,
+        //             "expiredDate":0
+        //         }, function (err,doc){
+        //             if(err){
+        //                 console.log("Error inserting record");
+        //                 console.log(err);
+        //                 return res.status(500).json(err);
+        //             }
+        //             else {
+        //                 console.log("Record insertion was successful");
+        //                 return res.status(200).json(req.body);
+        //             }
+        //         });
+        //     }
+        // })
     }
 });
 
@@ -171,6 +203,7 @@ app.post('/completeUpload',function(req,res){
                 if(err){
                     console.log("Error in file upload");
                     console.log(err);
+                    handleError(res, err.message, "Failed to Upload complete document.");
                     return res.status(500).send(err);
                 }
                 else {
@@ -208,7 +241,7 @@ app.post('/completeUpload',function(req,res){
 
 // START [Querying files]
 // ==================================================
-app.get('/getFiles',function(req,res){
+app.get('/completeUpload',function(req,res){
     // var collection = db.get('fileuploads');
     var study = req.query.study;
     var visit = req.query.visit;
@@ -218,7 +251,7 @@ app.get('/getFiles',function(req,res){
     if(!study && !doctype){
         db.collection(FILEUPLOADS_COLLECTION).find({complete:true,expired:false}).toArray(function(err,docs){
             if (err) {
-              handleError(res, err.message, "Failed to get contacts.");
+              handleError(res, err.message, "Failed to get complete docs.");
             } else {
               res.status(200).json(docs);
             }
@@ -273,23 +306,26 @@ app.get('/getFiles',function(req,res){
     // })
 })
 
-app.get('/getTemp',function(req,res){
-    var collection = db.get('fileuploads');
+app.get('/incompleteUpload',function(req,res){
+    // var collection = db.get('fileuploads');
 
-    collection.find({complete:false,expired:false}).then((docs) => {
-        console.log(docs);
-        res.status(200).json(docs)
-    })
+    db.collection(FILEUPLOADS_COLLECTION).find({complete:false,expired:false}).toArray(function(err,docs){
+        if (err) {
+          handleError(res, err.message, "Failed to get temp records.");
+        } else {
+          res.status(200).json(docs);
+        }
+    });
 })
 
 app.get('/file/:id', function (req, res) {
-    var collection = db.get('fileuploads')
+    // var collection = db.get('fileuploads')
     var id = req.params.id;
     if (!id) {
         console.log("No Document ID was provided");
         return res.status(500).send('No Doc ID provided')
     } else {
-        collection.find({_id:id,expired:false}).then((docs) => {
+        db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).then((docs) => {
             console.log("If no filepath printed below, theres an error.");
             var fileName = docs[0].filepath
             console.log("filename:",fileName);
@@ -313,14 +349,14 @@ app.get('/file/:id', function (req, res) {
 // START [Edit file]
 // ==================================================
 app.get('/editUpload/:id', function (req, res) {
-    var collection = db.get('fileuploads')
+    // var collection = db.get('fileuploads')
 
     var id = req.params.id;
     if (!id) {
         console.log("No document ID provided");
         return res.status(500).send('No document ID provided')
     } else {
-        collection.find({_id:id,expired:false}).then((docs) => {
+        db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).then((docs) => {
             var data = docs[0]
             console.log(data);
             // if error erase teh return keyword below
@@ -330,14 +366,14 @@ app.get('/editUpload/:id', function (req, res) {
 });
 
 app.post('/fileupload/:id', function (req, res) {
-    var collection = db.get('fileuploads')
+    // var collection = db.get('fileuploads')
 
     var id = req.params.id;
     if (!id) {
         console.log("No Document ID provided");
         return res.status(500).send('No document ID provided')
     } else {
-        collection.update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
+        db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
             if(err){
                 console.log("Error updating document record")
                 console.log(err);
@@ -356,13 +392,13 @@ app.post('/fileupload/:id', function (req, res) {
 // START [DROPDOWN Selections]
 // ==================================================
 app.get('/getStudies', function(req,res){
-    var collection = db.get('fileuploads');
+    // var collection = db.get('fileuploads');
     // collection.find({},)
     // collection.find({}, 'study').then((docs) => {
     //     console.log(docs);
     //   // only the name field will be selected
     // })
-    collection.distinct('study').then((docs) => {
+    db.collection(FILEUPLOADS_COLLECTION).distinct('study').then((docs) => {
         console.log(docs);
         res.json(docs)
       // only the name field will be selected
@@ -372,24 +408,24 @@ app.get('/getStudies', function(req,res){
 });
 
 app.get('/getVisits', function(req,res){
-    var collection = db.get('fileuploads')
+    // var collection = db.get('fileuploads')
     var study = req.query.study
     console.log(study);
 
-    collection.distinct('visit',{study:study}).then((docs) => {
+    db.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study}).then((docs) => {
         console.log(docs);
         res.json(docs)
     })
 })
 
 app.get('/getSessions', function(req,res){
-    var collection = db.get('fileuploads')
+    // var collection = db.get('fileuploads')
     var study = req.query.study
     var visit = req.query.visit
     console.log(study);
     console.log(visit);
 
-    collection.distinct('session',{study:study,visit:visit}).then((docs) => {
+    db.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit}).then((docs) => {
         console.log(docs)
         res.json(docs)
     })

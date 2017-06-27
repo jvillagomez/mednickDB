@@ -372,6 +372,10 @@ app.get('/test/',function(req,res){
     console.log("Working Fine");
     res.status(200).send("Working Fine");
 });
+app.get('/',function(req,res){
+    console.log("HIT Main");
+    res.status(200).send("Hit MAIN");
+});
 
 // app.post('/files/:id', function (req, res) {
 //     var id = req.params.id;

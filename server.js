@@ -27,6 +27,7 @@ var SLEEPSCORES_COLLECTION = "sleepScores"
 var SLEEPDIARIES_COLLECTION = "sleepDiaries"
 var SCREENINGS_COLLECTION = "screenings"
 var FILEUPLOADS_COLLECTION = "fileUploads";
+var TEST_COLLECTION = "test";
 
 app.set('port', (process.env.PORT || 8001));
 // ==============================================================
@@ -277,11 +278,9 @@ function getTempFiles(res){
 };
 
 function deleteFile(){
-
 };
 
 function editUpload(){
-
 };
 
 app.post('/upload',function(req,res){
@@ -321,26 +320,26 @@ app.get('/files/temp',function(req,res){
     getTempFiles(res);
 });
 
-app.post('/files/delete/',function(req,res){
-    var id = req.query.id;
-    if (!id) {
-        res.status(500).send('No document ID provided')
-    } else {
-        getFilebyID(res,id);
-    }
-});
-
-function moveFile(loc,dest){
-    if (loc == dest) {
-        console.log('No need to move.');
-        res.status(200).send('No need to move.')
-    }
-    else {
-
-    }
-
-callback;
-};
+// app.post('/files/delete/',function(req,res){
+//     var id = req.query.id;
+//     if (!id) {
+//         res.status(500).send('No document ID provided')
+//     } else {
+//         getFilebyID(res,id);
+//     }
+// });
+//
+// function moveFile(loc,dest){
+//     if (loc == dest) {
+//         console.log('No need to move.');
+//         res.status(200).send('No need to move.')
+//     }
+//     else {
+//
+//     }
+//
+// callback;
+// };
 
 
 
@@ -368,13 +367,24 @@ app.get('/files/:id', function (req, res) {
 });
 
 
-app.get('/test/',function(req,res){
-    console.log("Working Fine");
-    res.status(200).send("Working Fine");
+app.post('/test/',function(req,res){
+    insertDocument(res,TEST_COLLECTION,req.body);
 });
+
+app.get('/test/',function(req,res){
+    db.collection(TEST_COLLECTION).find({},function(err,docs){
+        if (err) {
+            handleError(res, err.message, "Failed to insert test record.");
+        } else {
+            res.status(200).json(docs);
+        }
+    });
+});
+
+
 app.get('/',function(req,res){
     console.log("HIT Main");
-    res.status(200).send("Hit MAIN");
+    res.status(200).send("Success placing GET call.");
 });
 
 // app.post('/files/:id', function (req, res) {

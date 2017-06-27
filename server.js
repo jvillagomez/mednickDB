@@ -372,7 +372,7 @@ app.post('/test/',function(req,res){
 });
 
 app.get('/test/',function(req,res){
-    db.collection(TEST_COLLECTION).find({},function(err,docs){
+    db.collection(TEST_COLLECTION).find().toArray(function(err,docs){
         if (err) {
             handleError(res, err.message, "Failed to insert test record.");
         } else {

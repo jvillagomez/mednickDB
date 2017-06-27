@@ -6,8 +6,10 @@ var fileUpload = require('express-fileupload');
 var path = require('path');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
+var ObjectId = require('mongodb').ObjectID;
 var monk = require('monk');
 var cors = require('cors');
+
 
 // var db = monk('localhost:27017/mednick');
 var app = express();
@@ -15,6 +17,7 @@ var app = express();
 var CWD = process.cwd();
 
 var UPLOAD_TO = path.join(CWD,"mednickFiles")
+var TEMP_DIR = path.join(CWD,"temp")
 // ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
@@ -37,9 +40,6 @@ app.use(function(req,res,next){
     req.db = db;
     next();
 });
-
-
-// ============================================================================
 
 // Create a database variable outside of the database connection callback to reuse the connection pool in your app.
 var db;
@@ -70,14 +70,11 @@ function handleError(res, reason, message, code) {
   res.status(code || 500).json({"error": message});
 }
 
-function insertDocument(collection_name,record) {
-    // record ADD COMPLETENESS AT END POINT
-    // Check dictionary for any empy strings as values
-    record.dateUploaded = Date.now();
-    record.uploadedBy = "JoeSchmoe";
-    db.collection(collection_name).insert(record, function (err,doc){
+function insertDocument(res,collection_name,data) {
+    data.dateUploaded = Date.now();
+    db.collection(collection_name).insert(data, function (err,doc){
         if(err){
-            handleError(res, err.message, err,"Document was not inserted!");
+            res.status(code || 500).json({"error": message});
         }
         else {
             res.status(201).json(doc);
@@ -85,164 +82,131 @@ function insertDocument(collection_name,record) {
     });
 }
 
-function uploadFile(){
+function CheckDir(res, dir, callback){
+    if (!fs.existsSync(dir)){
+        console.log('Dir does not exist yet');
+        mkdirp.sync(dir, function (err) {
+            if (err){
+                console.log('Error creating fileDir')
+                console.error(err)
+                return res.status(500).send(err);
 
-}
-
-function uploadSleepFile(){
-
-}
-
-// ============================================================================
-
-// ==============================================================
-// START [Uploading files]
-// ==================================================
-app.post('/incompleteUpload',function(req,res){
-    if(!req.files || !req.body.name){
-        console.log("No file was uploaded")
-        return res.status(400).send('No files were uploaded.')
-    } else {
-        var crip = req.body
-        crip.date = "crip niggaz"
-        console.log(crip);
-        console.log(typeof crip);
-
-        console.log(req.files.docfile);
-        console.log(typeof req.files.docfile);
-        // let fileObj = req.files.docfile;
-        // var fileName = req.body.name[0]; //including file extension
-        // var study = !(req.body.study).trim() ? "" : req.body.study;
-        // var subject = !(req.body.subject).trim() ? "" : req.body.subject;
-        // var visit = !(req.body.visit).trim() ? "" : req.body.visit;
-        // var session = !(req.body.session).trim() ? "" : req.body.session;
-        // var docType = !(req.body.doctype) ? "" : req.body.doctype;
-        // var filePath = path.join(UPLOAD_TO,'temp',fileName);
-        // var notes = !(req.body.notes).trim() ? "" : req.body.notes;
-        // var dateUploaded = Date.now();
-        // var expired = false;
-        //
-        //
-        // fileObj.mv(filePath, function(err){
-        //     if(err){
-        //         console.log("Error in uploading file");
-        //         console.log(err);
-        //         return res.status(500).send(err);
-        //     }
-        //     else {
-        //         console.log("Successfully uploaded file");
-        //         db.collection(FILEUPLOADS_COLLECTION).insert({
-        //             "filename":fileName,
-        //             "study":study,
-        //             "subject":subject,
-        //             "visit":visit,
-        //             "session":session,
-        //             "doctype":docType,
-        //             "filepath":filePath,
-        //             "notes":notes,
-        //             "complete":false,
-        //             "dateUploaded":dateUploaded,
-        //             "expired":false,
-        //             "expiredDate":0
-        //         }, function (err,doc){
-        //             if(err){
-        //                 console.log("Error inserting record");
-        //                 console.log(err);
-        //                 return res.status(500).json(err);
-        //             }
-        //             else {
-        //                 console.log("Record insertion was successful");
-        //                 return res.status(200).json(req.body);
-        //             }
-        //         });
-        //     }
-        // })
-    }
-});
-
-app.post('/completeUpload',function(req,res){
-    // var collection = db.get('fileUploads');
-    // End callback if no file was chosen
-    if(!req.files || !req.body.name){
-        return res.status(400).send('No files were uploaded.')
-    } else {
-        // End callback if a single filed is missing
-        if(!req.body.study || !req.body.subject || !req.body.visit || !req.body.session || !req.body.filetype){
-            return res.status(400).send("Missing Fields. Use '/incompleteUpload' endpoint instead.")
-        } else {
-            let fileObj = req.files.docfile;
-            var fileName = req.body.name; //including file extension
-            var study = req.body.study;
-            var subject = req.body.subject;
-            var visit = req.body.visit;
-            var session = req.body.session;
-            var docType = req.body.filetype;
-            var fileDir = path.join(UPLOAD_TO,study,visit,session,subject,docType);// fileDir was created to chekc if directory exists, before uploading file.
-            console.log(fileDir);
-            var filePath = path.join(fileDir,fileName);
-            var notes = !(req.body.notes).trim() ? "" : req.body.notes;
-            var dateUploaded = Date.now();
-
-            if (!fs.existsSync(fileDir)){
-                console.log('Dir does not exist yet');
-                mkdirp.sync(fileDir, function (err) {
-                    if (err){
-                        console.log('Error creating fileDir')
-                        console.error(err)
-                        return res.status(500).send(err);
-
-                    } else {
-                        console.log('fileDir created successfully')
-                        console.log(fileDir)
-                    }
-                });
+            } else {
+                console.log('fileDir created successfully')
+                console.log(dir)
             }
+        });
+    }
+    console.log("dont checking DIR");
+    callback;
+};
 
-            fileObj.mv(filePath, function(err){
-                console.log(filePath);
-                if(err){
-                    console.log("Error in file upload");
-                    console.log(err);
-                    handleError(res, err.message, "Failed to Upload complete document.");
-                    return res.status(500).send(err);
-                }
-                else {
-                    console.log("File successfully moved");
-                    db.collection(FILEUPLOADS_COLLECTION).insert({
-                        "filename":fileName,
-                        "study":study,
-                        "subject":subject,
-                        "visit":visit,
-                        "session":session,
-                        "doctype":docType,
-                        "filepath":filePath,
-                        "notes":notes,
-                        "complete":true,
-                        "dateUploaded":dateUploaded,
-                        "expired":false,
-                        "expiredDate":0
-                    }, function (err,doc){
-                        if(err){
-                            handleError(res, err.message, "Failed to Upload complete document.");
-                        }
-                        else {
-                            path.resolve(process.env.PWD);
-                            console.log("DB insertion successful")
-                            return res.status(200).json(req.body);
-                        }
-                    });
-                }
-            })
+function uploadFile(res,file,dir,fileObject,filedata){
+    console.log(file);
+    if(!fs.existsSync(file)){
+        fileObject.mv(file, function(err){
+            console.log(dir);
+            if(err){
+                console.log("Error in file upload");
+                console.log(err);
+                res.status(500)
+            }
+            else {
+                console.log("File successfully moved");
+                insertDocument(res,FILEUPLOADS_COLLECTION,filedata)
+            }
+        })
+    }
+    else {
+        return res.status(500).send("File already exists!");
+    }
+}
+
+function isComplete(data){
+    var metadata = [
+        data.study,
+        data.visit,
+        data.session,
+        data.doctype
+    ];
+
+    console.log(metadata);
+
+    for (attribute of metadata) {
+        if(!attribute){
+            console.log("false");
+            return false
         }
     }
-});
-// ==================================================
-// END [Uploading Files]
+    console.log("true");
+    return true
+};
 
-// START [Querying files]
-// ==================================================
-app.get('/completeUpload',function(req,res){
-    // var collection = db.get('fileuploads');
+function completeUpload(res,file_object,data){
+    data.complete = true;
+    var study = (data.study).trim();
+    var visit = (data.visit).trim();
+    var session = (data.session).trim();
+    var doctype = (data.doctype).trim();
+    var file_name = (data.filename).trim();
+
+    var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
+    var file_path = path.join(dir_path, file_name);
+    data.path = file_path;
+    CheckDir(res, dir_path, uploadFile(res,file_path,dir_path,file_object,data));
+};
+
+function incompleteUpload(file_object,data){
+    data.complete = false;
+    var file_path = path.join(TEMP_DIR,data.filename);
+    data.path = file_path;
+    uploadFile(res,file_path,TEMP_DIR,file_object,data);
+};
+
+function downloadFileByID(res,id){
+    // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).toArray(function(err,docs){
+    db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+        if (!docs) {
+            res.status(404).send(("No document found matching"+id));
+        } else {
+            console.log("If no filepath printed below, theres an error.");
+            console.log(docs);
+            var fileName = docs[0].path
+            console.log("filename:",fileName);
+            res.sendFile(fileName, function (err) {
+                if (err) {
+                    console.log("Error serving file object");
+                    console.log(err)
+                    res.status(404).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
+        }
+    });
+};
+
+
+// Upload Files   [X]
+// Edit File      [ ]
+// Delete File    [ ]
+// Get Files      [X]
+// Get File       [X]
+// Download File  [X]
+
+function getFilebyID(res,id){
+    db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+        if (err) {
+            handleError(res, err.message, "Failed to get temp records.");
+        } else {
+            var data = docs[0]
+            console.log(data);
+            res.status(200).json(data)
+        }
+    });
+};
+
+function getCompleteFiles(req,res){
     var study = req.query.study;
     var visit = req.query.visit;
     var session = req.query.session;
@@ -253,6 +217,7 @@ app.get('/completeUpload',function(req,res){
             if (err) {
               handleError(res, err.message, "Failed to get complete docs.");
             } else {
+                console.log(docs);
               res.status(200).json(docs);
             }
         });
@@ -299,16 +264,9 @@ app.get('/completeUpload',function(req,res){
     } else {
         console.log("If youre seeing this somthing is completely fucked up in the request :)");
     }
+};
 
-    // collection.find({study:study,visit:visit,session:session,doctype:doctype}, 'study').then((docs) => {
-    //     console.log(docs);
-    //   // only the name field will be selected
-    // })
-})
-
-app.get('/incompleteUpload',function(req,res){
-    // var collection = db.get('fileuploads');
-
+function getTempFiles(res){
     db.collection(FILEUPLOADS_COLLECTION).find({complete:false,expired:false}).toArray(function(err,docs){
         if (err) {
           handleError(res, err.message, "Failed to get temp records.");
@@ -316,120 +274,171 @@ app.get('/incompleteUpload',function(req,res){
           res.status(200).json(docs);
         }
     });
-})
+};
 
-app.get('/file/:id', function (req, res) {
-    // var collection = db.get('fileuploads')
-    var id = req.params.id;
-    if (!id) {
-        console.log("No Document ID was provided");
-        return res.status(500).send('No Doc ID provided')
+function deleteFile(){
+
+};
+
+function editUpload(){
+
+};
+
+app.post('/upload',function(req,res){
+    if(!req.files){
+        console.log("No file was uploaded")
+        return res.status(400).send('No files were uploaded.')
     } else {
-        db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).then((docs) => {
-            console.log("If no filepath printed below, theres an error.");
-            var fileName = docs[0].filepath
-            console.log("filename:",fileName);
-            res.sendFile(fileName, function (err) {
-                if (err) {
-                    console.log("Error serving file object");
-                    console.log(err)
-                    return res.status(404).send(err);
-                } else {
-                    console.log('Sent:', fileName);
-                    // Delete below line if giving you shit or not serving file; shit worked in postman
-                    return res.status(200).send("File was served successfully");
-                }
-            });
-        })
-    }
-});
-// ==================================================
-// END [Querying Files]
+        var entry = req.body;
+        var file_object = req.files.docfile;
+        var complete = isComplete(entry);
+        entry.filename = file_object.name;
+        entry.expired = false
+        entry.uploadedBy = "stude001@ucr.edu";
 
-// START [Edit file]
-// ==================================================
-app.get('/editUpload/:id', function (req, res) {
-    // var collection = db.get('fileuploads')
-
-    var id = req.params.id;
-    if (!id) {
-        console.log("No document ID provided");
-        return res.status(500).send('No document ID provided')
-    } else {
-        db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).then((docs) => {
-            var data = docs[0]
-            console.log(data);
-            // if error erase teh return keyword below
-            return res.status(200).json(data)
-        });
+        if (complete) {
+            completeUpload(res,file_object,entry);
+        } else {
+            incompleteUpload(res,file_object,entry);
+        }
     }
 });
 
-app.post('/fileupload/:id', function (req, res) {
-    // var collection = db.get('fileuploads')
-
-    var id = req.params.id;
+app.get('/files/download/', function (req, res) {
+    var id = req.query.id;
     if (!id) {
-        console.log("No Document ID provided");
-        return res.status(500).send('No document ID provided')
+        res.status(500).send('No Doc ID provided')
     } else {
-        db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
-            if(err){
-                console.log("Error updating document record")
+        downloadFileByID(res,id);
+    }
+});
+
+app.get('/files/',function(req,res){
+    getCompleteFiles(req,res);
+});
+
+app.get('/files/temp',function(req,res){
+    getTempFiles(res);
+});
+
+app.post('/files/delete/',function(req,res){
+    var id = req.query.id;
+    if (!id) {
+        res.status(500).send('No document ID provided')
+    } else {
+        getFilebyID(res,id);
+    }
+});
+
+function moveFile(loc,dest){
+    if (loc == dest) {
+        console.log('No need to move.');
+        res.status(200).send('No need to move.')
+    }
+    else {
+
+    }
+
+callback;
+};
+
+
+
+function expireDocument(res,id){
+    db.collection.findOneAndUpdate(
+        {_id:ObjectId(id),expired:false},
+        {expired:true},function(err,docs){
+            if (err) {
                 console.log(err);
-                return res.status(500).json(err);
+                handleError(res, err.message, "Failed to update record. Maybe it doesnt exist. Read Err.");
+            } else {
+                console.log("UPDATED SUCCESS");
+                res.status(200).json(docs);
             }
-            else {
-                console.log("Record was updated accordingly")
-                return res.status(200).json(req.body);
-            }
-        });
+    });
+};
+
+app.get('/files/:id', function (req, res) {
+    var id = req.query.id;
+    if (!id) {
+        res.status(500).send('No document ID provided')
+    } else {
+        getFilebyID(res,id);
     }
 });
-// ==================================================
-// END [Edit file]
-// =============================================================================
+
+
+app.get('/test/',function(req,res){
+    console.log("Working Fine");
+    res.status(200).send("Working Fine");
+});
+
+// app.post('/files/:id', function (req, res) {
+//     var id = req.params.id;
+//     if (!id) {
+//         console.log("No Document ID provided");
+//         return res.status(500).send('No document ID provided')
+//     } else {
+//         db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
+//             if(err){
+//                 console.log("Error updating document record")
+//                 console.log(err);
+//                 return res.status(500).json(err);
+//             }
+//             else {
+//                 console.log("Record was updated accordingly")
+//                 return res.status(200).json(req.body);
+//             }
+//         });
+//     }
+// });
+
 // START [DROPDOWN Selections]
 // ==================================================
-app.get('/getStudies', function(req,res){
-    // var collection = db.get('fileuploads');
-    // collection.find({},)
-    // collection.find({}, 'study').then((docs) => {
-    //     console.log(docs);
-    //   // only the name field will be selected
-    // })
-    db.collection(FILEUPLOADS_COLLECTION).distinct('study').then((docs) => {
-        console.log(docs);
-        res.json(docs)
-      // only the name field will be selected
-    })
-    // TODO THIS BELOW IS THE GOAL FOR BEN
-    // api/users?id=4&token=sdfa3&geo=us
+app.get('/getStudies/', function(req,res){
+    db.collection(FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
+        if (err) {
+          handleError(res, err.message, "Failed to get studies.");
+        } else {
+          res.status(200).json(docs);
+        }
+    }));
 });
-
-app.get('/getVisits', function(req,res){
-    // var collection = db.get('fileuploads')
+app.get('/getVisits/', function(req,res){
     var study = req.query.study
     console.log(study);
 
-    db.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study}).then((docs) => {
-        console.log(docs);
-        res.json(docs)
-    })
-})
-
-app.get('/getSessions', function(req,res){
-    // var collection = db.get('fileuploads')
+    db.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
+        if (err) {
+          handleError(res, err.message, "Failed to get visits.");
+        } else {
+          res.status(200).json(docs);
+        }
+    }));
+});
+app.get('/getSessions/', function(req,res){
     var study = req.query.study
     var visit = req.query.visit
     console.log(study);
     console.log(visit);
 
-    db.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit}).then((docs) => {
-        console.log(docs)
-        res.json(docs)
-    })
-})
+    db.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
+        if (err) {
+          handleError(res, err.message, "Failed to get Sessions.");
+        } else {
+          res.status(200).json(docs);
+        }
+    }));
+});
+app.get('/getDocTypes/', function(req,res){
+    db.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
+        if (err) {
+          handleError(res, err.message, "Failed to get visits.");
+        } else {
+          res.status(200).json(docs);
+        }
+    }));
+});
 // ==================================================
 // END [DROPDOWN Selections]
 

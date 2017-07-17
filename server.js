@@ -1,5 +1,7 @@
 var fs = require('fs');
 var mkdirp = require('mkdirp');
+var mkpath = require('mkpath');
+
 var express = require('express');
 var router = express.Router();
 var fileUpload = require('express-fileupload');
@@ -66,10 +68,11 @@ mongo.MongoClient.connect(MONGODB_URI, function (err, database) {
 });
 
 // Generic error handler used by all endpoints.
+
 function handleError(res, reason, message, code) {
   console.log("ERROR: " + reason);
   res.status(code || 500).json({"error": message});
-}
+};
 
 function insertDocument(res,collection_name,data) {
     data.dateUploaded = Date.now();
@@ -81,46 +84,53 @@ function insertDocument(res,collection_name,data) {
             res.status(201).json(doc);
         }
     });
-}
+};
 
-function CheckDir(res, dir, callback){
-    if (!fs.existsSync(dir)){
+function CheckDir(res,file_path,dir_path,file_object,data,callback){
+    if (!fs.existsSync(dir_path)){
         console.log('Dir does not exist yet');
-        mkdirp.sync(dir, function (err) {
+        mkpath(dir_path, function (err) {
+            console.log("Crip niggas");
             if (err){
-                console.log('Error creating fileDir')
-                console.error(err)
+                console.log('Error creating fileDir');
+                console.error(err);
                 return res.status(500).send(err);
-
-            } else {
-                console.log('fileDir created successfully')
-                console.log(dir)
+            }
+            else {
+                console.log('fileDir created successfully');
+                console.log(dir_path);
+                callback(res,file_path,dir_path,file_object,data)
             }
         });
     }
-    console.log("dont checking DIR");
-    callback;
+    else {
+        callback(res,file_path,dir_path,file_object,data)
+    }
+
+    // console.log("done checking DIR");
+    // callback(res,file_path,dir_path,file_object,data);
 };
 
-function uploadFile(res,file,dir,fileObject,filedata){
-    console.log(file);
-    if(!fs.existsSync(file)){
-        fileObject.mv(file, function(err){
-            console.log(dir);
+function uploadFile(res,file_path,dir_path,file_object,data){
+    console.log("HITS UPLAOD FILE");
+    if(!fs.existsSync(file_path)){
+        file_object.mv(file_path, function(err){
+            console.log(dir_path);
             if(err){
                 console.log("Error in file upload");
                 console.log(err);
-                res.status(500)
+                return res.status(500).send(err);
             }
             else {
                 console.log("File successfully moved");
-                insertDocument(res,FILEUPLOADS_COLLECTION,filedata)
+                insertDocument(res,FILEUPLOADS_COLLECTION,data)
             }
         })
     }
     else {
         return res.status(500).send("File already exists!");
     }
+    // console.log("HITTING UPLOAD FILE FUNC");
 }
 
 function isComplete(data){
@@ -131,11 +141,11 @@ function isComplete(data){
         data.doctype
     ];
 
-    console.log(metadata);
+    // console.log(metadata);
 
     for (attribute of metadata) {
         if(!attribute){
-            console.log("false");
+            // console.log("false");
             return false
         }
     }
@@ -154,38 +164,43 @@ function completeUpload(res,file_object,data){
     var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
     var file_path = path.join(dir_path, file_name);
     data.path = file_path;
-    CheckDir(res, dir_path, uploadFile(res,file_path,dir_path,file_object,data));
+
+    CheckDir(res,file_path,dir_path,file_object,data,uploadFile);
+
+
 };
 
-function incompleteUpload(file_object,data){
+function incompleteUpload(res,file_object,data){
     data.complete = false;
+    // console.log(data.filename);
+    // console.log(TEMP_DIR);
     var file_path = path.join(TEMP_DIR,data.filename);
     data.path = file_path;
     uploadFile(res,file_path,TEMP_DIR,file_object,data);
 };
 
-function downloadFileByID(res,id){
-    // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).toArray(function(err,docs){
-    db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
-        if (!docs) {
-            res.status(404).send(("No document found matching"+id));
-        } else {
-            console.log("If no filepath printed below, theres an error.");
-            console.log(docs);
-            var fileName = docs[0].path
-            console.log("filename:",fileName);
-            res.sendFile(fileName, function (err) {
-                if (err) {
-                    console.log("Error serving file object");
-                    console.log(err)
-                    res.status(404).send(err);
-                } else {
-                    console.log('Sent:', fileName);
-                }
-            });
-        }
-    });
-};
+// function downloadFileByID(res,id){
+//     // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).toArray(function(err,docs){
+//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+//         if (!docs) {
+//             res.status(404).send(("No document found matching"+id));
+//         } else {
+//             console.log("If no filepath printed below, theres an error.");
+//             console.log(docs);
+//             var fileName = docs[0].path
+//             console.log("filename:",fileName);
+//             res.sendFile(fileName, function (err) {
+//                 if (err) {
+//                     console.log("Error serving file object");
+//                     console.log(err)
+//                     res.status(404).send(err);
+//                 } else {
+//                     console.log('Sent:', fileName);
+//                 }
+//             });
+//         }
+//     });
+// };
 
 
 // Upload Files   [X]
@@ -195,17 +210,17 @@ function downloadFileByID(res,id){
 // Get File       [X]
 // Download File  [X]
 
-function getFilebyID(res,id){
-    db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
-        if (err) {
-            handleError(res, err.message, "Failed to get temp records.");
-        } else {
-            var data = docs[0]
-            console.log(data);
-            res.status(200).json(data)
-        }
-    });
-};
+// function getFilebyID(res,id){
+//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+//         if (err) {
+//             handleError(res, err.message, "Failed to get temp records.");
+//         } else {
+//             var data = docs[0]
+//             console.log(data);
+//             res.status(200).json(data)
+//         }
+//     });
+// };
 
 function getCompleteFiles(req,res){
     var study = req.query.study;
@@ -277,20 +292,23 @@ function getTempFiles(res){
     });
 };
 
-function deleteFile(){
-};
+// function deleteFile(){
+// };
 
-function editUpload(){
-};
+// function editUpload(){
+// };
 
-app.post('/upload',function(req,res){
+app.post('/upload/',function(req,res){
     if(!req.files){
         console.log("No file was uploaded")
         return res.status(400).send('No files were uploaded.')
     } else {
         var entry = req.body;
+        console.log(entry);
         var file_object = req.files.docfile;
+        // console.log(file_object);
         var complete = isComplete(entry);
+        // console.log(complete);
         entry.filename = file_object.name;
         entry.expired = false
         entry.uploadedBy = "stude001@ucr.edu";
@@ -303,20 +321,20 @@ app.post('/upload',function(req,res){
     }
 });
 
-app.get('/files/download/', function (req, res) {
-    var id = req.query.id;
-    if (!id) {
-        res.status(500).send('No Doc ID provided')
-    } else {
-        downloadFileByID(res,id);
-    }
-});
+// app.get('/files/download/', function (req, res) {
+//     var id = req.query.id;
+//     if (!id) {
+//         res.status(500).send('No Doc ID provided')
+//     } else {
+//         downloadFileByID(res,id);
+//     }
+// });
 
 app.get('/files/',function(req,res){
     getCompleteFiles(req,res);
 });
 
-app.get('/files/temp',function(req,res){
+app.get('/files/temp/',function(req,res){
     getTempFiles(res);
 });
 
@@ -328,7 +346,7 @@ app.get('/files/temp',function(req,res){
 //         getFilebyID(res,id);
 //     }
 // });
-//
+
 // function moveFile(loc,dest){
 //     if (loc == dest) {
 //         console.log('No need to move.');
@@ -343,43 +361,42 @@ app.get('/files/temp',function(req,res){
 
 
 
-function expireDocument(res,id){
-    db.collection.findOneAndUpdate(
-        {_id:ObjectId(id),expired:false},
-        {expired:true},function(err,docs){
-            if (err) {
-                console.log(err);
-                handleError(res, err.message, "Failed to update record. Maybe it doesnt exist. Read Err.");
-            } else {
-                console.log("UPDATED SUCCESS");
-                res.status(200).json(docs);
-            }
-    });
-};
+// function expireDocument(res,id){
+//     db.collection.findOneAndUpdate(
+//         {_id:ObjectId(id),expired:false},
+//         {expired:true},function(err,docs){
+//             if (err) {
+//                 console.log(err);
+//                 handleError(res, err.message, "Failed to update record. Maybe it doesnt exist. Read Err.");
+//             } else {
+//                 console.log("UPDATED SUCCESS");
+//                 res.status(200).json(docs);
+//             }
+//     });
+// };
 
-app.get('/files/:id', function (req, res) {
-    var id = req.query.id;
-    if (!id) {
-        res.status(500).send('No document ID provided')
-    } else {
-        getFilebyID(res,id);
-    }
-});
+// app.get('/files/:id', function (req, res) {
+//     var id = req.query.id;
+//     if (!id) {
+//         res.status(500).send('No document ID provided')
+//     } else {
+//         getFilebyID(res,id);
+//     }
+// });
 
+// app.post('/test/',function(req,res){
+//     insertDocument(res,TEST_COLLECTION,req.body);
+// });
 
-app.post('/test/',function(req,res){
-    insertDocument(res,TEST_COLLECTION,req.body);
-});
-
-app.get('/test/',function(req,res){
-    db.collection(TEST_COLLECTION).find().toArray(function(err,docs){
-        if (err) {
-            handleError(res, err.message, "Failed to insert test record.");
-        } else {
-            res.status(200).json(docs);
-        }
-    });
-});
+// app.get('/test/',function(req,res){
+//     db.collection(TEST_COLLECTION).find().toArray(function(err,docs){
+//         if (err) {
+//             handleError(res, err.message, "Failed to insert test record.");
+//         } else {
+//             res.status(200).json(docs);
+//         }
+//     });
+// });
 
 
 app.get('/',function(req,res){
@@ -409,41 +426,45 @@ app.get('/',function(req,res){
 
 // START [DROPDOWN Selections]
 // ==================================================
-app.get('/getStudies/', function(req,res){
-    db.collection(FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
-        if (err) {
-          handleError(res, err.message, "Failed to get studies.");
-        } else {
-          res.status(200).json(docs);
-        }
-    }));
-});
-app.get('/getVisits/', function(req,res){
-    var study = req.query.study
-    console.log(study);
 
-    db.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
-        if (err) {
-          handleError(res, err.message, "Failed to get visits.");
-        } else {
-          res.status(200).json(docs);
-        }
-    }));
-});
-app.get('/getSessions/', function(req,res){
-    var study = req.query.study
-    var visit = req.query.visit
-    console.log(study);
-    console.log(visit);
+// app.get('/getStudies/', function(req,res){
+//     db.collection(FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
+//         if (err) {
+//           handleError(res, err.message, "Failed to get studies.");
+//         } else {
+//           res.status(200).json(docs);
+//         }
+//     }));
+// });
 
-    db.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
-        if (err) {
-          handleError(res, err.message, "Failed to get Sessions.");
-        } else {
-          res.status(200).json(docs);
-        }
-    }));
-});
+// app.get('/getVisits/', function(req,res){
+//     var study = req.query.study
+//     console.log(study);
+//
+//     db.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
+//         if (err) {
+//           handleError(res, err.message, "Failed to get visits.");
+//         } else {
+//           res.status(200).json(docs);
+//         }
+//     }));
+// });
+
+// app.get('/getSessions/', function(req,res){
+//     var study = req.query.study
+//     var visit = req.query.visit
+//     console.log(study);
+//     console.log(visit);
+//
+//     db.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
+//         if (err) {
+//           handleError(res, err.message, "Failed to get Sessions.");
+//         } else {
+//           res.status(200).json(docs);
+//         }
+//     }));
+// });
+
 app.get('/getDocTypes/', function(req,res){
     db.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
         if (err) {

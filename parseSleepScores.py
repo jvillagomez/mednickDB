@@ -3,14 +3,8 @@ import requests
 import json
 import os
 
-
-
 testdir = "E:\\Teledyne-20170718T011945Z-001\\Teledyne\\ScoreFiles"
 doctype = {'doctype': 'sleepScore'}
-
-# { a : { $exists : false } }
-
-# def adjustDocumentInMongo():
 
 def parseJsonfromFile(filepath):
     book = xlrd.open_workbook(filepath)
@@ -53,15 +47,6 @@ def getAllCompleteFileRecords():
 
     return filesToParse
 
-# def InsertNewFile(_file):
-#     filename = os.path.basename(_file)
-#     path = _file
-#     expired = 0
-#     complete = 0
-#
-#     request = requests.post("http://127.0.0.1:8001/files/temp/new/", data = {'filename':filename,'path':path,'expired':expired,'complete':complete})
-#     print (request)
-#     return request
 
 def parseAndUpdateDocument(_file):
     jsonObject = parseJsonfromFile(_file['path'])
@@ -85,13 +70,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-# _files = [i["path"] for i in filesToParse]

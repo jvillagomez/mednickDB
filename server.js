@@ -342,7 +342,7 @@ app.post('/upload/',function(req,res){
             }
         }
 
-        return res.status(201).json("Uploading successfull");
+        return// res.status(201).json("Uploading successfull");
     }
 });
 
@@ -517,13 +517,13 @@ app.post('/insert/sleepScoring/', function(req,res){
     insertDocument(res, SLEEPSCORES_COLLECTION, req.body);
 });
 
-db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
-    if (err) {
-      handleError(res, err.message, "Failed to get temp records.");
-    } else {
-      res.status(200).json(docs);
-    }
-});
+// db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
+//     if (err) {
+//       handleError(res, err.message, "Failed to get temp records.");
+//     } else {
+//       res.status(200).json(docs);
+//     }
+// });
 // app.post('/insert/sleepDemographic/', function(req,res){
 //     db.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
 //         if (err) {

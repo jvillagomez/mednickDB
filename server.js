@@ -82,6 +82,7 @@ function insertDocument(res,collection_name,data) {
         }
         else {
             res.status(201).json(doc);
+            console.log("inserted!");
         }
     });
 };
@@ -154,7 +155,7 @@ function isComplete(data){
 };
 
 function completeUpload(res,file_object,data){
-    data.complete = true;
+    data.complete = "1";
     var study = (data.study).trim();
     var visit = (data.visit).trim();
     var session = (data.session).trim();
@@ -171,7 +172,7 @@ function completeUpload(res,file_object,data){
 };
 
 function incompleteUpload(res,file_object,data){
-    data.complete = false;
+    data.complete = "0";
     // console.log(data.filename);
     // console.log(TEMP_DIR);
     var file_path = path.join(TEMP_DIR,data.filename);
@@ -180,8 +181,8 @@ function incompleteUpload(res,file_object,data){
 };
 
 // function downloadFileByID(res,id){
-//     // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:false}).toArray(function(err,docs){
-//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+//     // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:"0"}).toArray(function(err,docs){
+//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
 //         if (!docs) {
 //             res.status(404).send(("No document found matching"+id));
 //         } else {
@@ -211,7 +212,7 @@ function incompleteUpload(res,file_object,data){
 // Download File  [X]
 
 // function getFilebyID(res,id){
-//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:false}).toArray(function(err,docs){
+//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
 //         if (err) {
 //             handleError(res, err.message, "Failed to get temp records.");
 //         } else {
@@ -229,7 +230,7 @@ function getCompleteFiles(req,res){
     var doctype = req.query.doctype;
 
     if(!study && !doctype){
-        db.collection(FILEUPLOADS_COLLECTION).find({complete:true,expired:false}).toArray(function(err,docs){
+        db.collection(FILEUPLOADS_COLLECTION).find({complete:"1",expired:"0"}).toArray(function(err,docs){
             if (err) {
               handleError(res, err.message, "Failed to get complete docs.");
             } else {
@@ -239,40 +240,40 @@ function getCompleteFiles(req,res){
         });
 
     } else if (!study && doctype) {
-        collection.find({doctype:doctype,complete:true,expired:false}).then((docs) => {
+        collection.find({doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (study && !doctype) {
         if(!visit){
-            collection.find({study:study,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,visit:visit,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         }
     } else if (study && doctype) {
         if(!visit){
-            collection.find({study:study,doctype:doctype,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,doctype:doctype,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:true,expired:false}).then((docs) => {
+            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
                 console.log(docs);
                 res.status(200).json(docs)
             })
@@ -283,7 +284,7 @@ function getCompleteFiles(req,res){
 };
 
 function getTempFiles(res){
-    db.collection(FILEUPLOADS_COLLECTION).find({complete:false,expired:false}).toArray(function(err,docs){
+    db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
         if (err) {
           handleError(res, err.message, "Failed to get temp records.");
         } else {
@@ -305,19 +306,43 @@ app.post('/upload/',function(req,res){
     } else {
         var entry = req.body;
         console.log(entry);
-        var file_object = req.files.docfile;
-        // console.log(file_object);
-        var complete = isComplete(entry);
-        // console.log(complete);
-        entry.filename = file_object.name;
-        entry.expired = false
-        entry.uploadedBy = "stude001@ucr.edu";
 
-        if (complete) {
-            completeUpload(res,file_object,entry);
-        } else {
-            incompleteUpload(res,file_object,entry);
+        var fileQuantity = (req.files.docfile).length;
+        if (fileQuantity)
+        {
+            var file_objects = req.files.docfile;
+            file_objects.forEach(function(file_object) {
+                console.log(file_object);
+
+                entry.filename = file_object.name;
+                entry.expired = "0";
+                entry.uploadedBy = "stude001@ucr.edu";
+
+                incompleteUpload(res,file_object,entry);
+
+            });
         }
+
+        else
+        {
+            var file_object = req.files.docfile;
+            console.log(file_object);
+
+            var complete = isComplete(entry);
+
+            // console.log(complete);
+            entry.filename = file_object.name;
+            entry.expired = "0"
+            entry.uploadedBy = "stude001@ucr.edu";
+
+            if (complete) {
+                completeUpload(res,file_object,entry);
+            } else {
+                incompleteUpload(res,file_object,entry);
+            }
+        }
+
+        return res.status(201).json("Uploading successfull");
     }
 });
 
@@ -359,12 +384,18 @@ app.get('/files/temp/',function(req,res){
 // callback;
 // };
 
+app.post('/files/temp/new/',function(req,res){
+    insertDocument(res,FILEUPLOADS_COLLECTION,req.body);
+});
+
+
+
 
 
 // function expireDocument(res,id){
 //     db.collection.findOneAndUpdate(
-//         {_id:ObjectId(id),expired:false},
-//         {expired:true},function(err,docs){
+//         {_id:ObjectId(id),expired:"0"},
+//         {expired:"1"},function(err,docs){
 //             if (err) {
 //                 console.log(err);
 //                 handleError(res, err.message, "Failed to update record. Maybe it doesnt exist. Read Err.");
@@ -410,7 +441,7 @@ app.get('/',function(req,res){
 //         console.log("No Document ID provided");
 //         return res.status(500).send('No document ID provided')
 //     } else {
-//         db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:false},{expired:true,expiredDate:Date.now()}).then((docs) => {
+//         db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:"0"},{expired:"1",expiredDate:Date.now()}).then((docs) => {
 //             if(err){
 //                 console.log("Error updating document record")
 //                 console.log(err);
@@ -476,6 +507,38 @@ app.get('/getDocTypes/', function(req,res){
 });
 // ==================================================
 // END [DROPDOWN Selections]
+
+app.post('/insert/sleepScoring/', function(req,res){
+    insertDocument(res, SLEEPSCORES_COLLECTION, req.body);
+});
+
+
+app.post('/insert/sleepScoring/', function(req,res){
+    insertDocument(res, SLEEPSCORES_COLLECTION, req.body);
+});
+
+db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
+    if (err) {
+      handleError(res, err.message, "Failed to get temp records.");
+    } else {
+      res.status(200).json(docs);
+    }
+});
+// app.post('/insert/sleepDemographic/', function(req,res){
+//     db.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
+//         if (err) {
+//           handleError(res, err.message, "Failed to get visits.");
+//         } else {
+//           res.status(200).json(docs);
+//         }
+//     }));
+// });
+
+
+
+
+
+
 
 // ==============================================================
 // START [server instance]

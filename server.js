@@ -87,6 +87,24 @@ function insertDocument(res,collection_name,data) {
     });
 };
 
+function updateParsedDocument(res,id) {
+    db.collection(FILEUPLOADS_COLLECTION).updateOne(
+       { _id: ObjectId(id) },
+       {
+         $set: { "parsed": "1"},
+         $currentDate: { lastModified: true }
+     },
+     function(err,doc){
+         if(err){
+             res.status(code || 500).json({"error": message});
+         }
+         else {
+             res.status(201).json(doc);
+             console.log("updated!");
+         }
+     });
+};
+
 function CheckDir(res,file_path,dir_path,file_object,data,callback){
     if (!fs.existsSync(dir_path)){
         console.log('Dir does not exist yet');
@@ -211,17 +229,17 @@ function incompleteUpload(res,file_object,data){
 // Get File       [X]
 // Download File  [X]
 
-// function getFilebyID(res,id){
-//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
-//         if (err) {
-//             handleError(res, err.message, "Failed to get temp records.");
-//         } else {
-//             var data = docs[0]
-//             console.log(data);
-//             res.status(200).json(data)
-//         }
-//     });
-// };
+function getFilebyID(res,id){
+    db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
+        if (err) {
+            handleError(res, err.message, "Failed to get temp records.");
+        } else {
+            var data = docs[0]
+            console.log(data);
+            res.status(200).json(data)
+        }
+    });
+};
 
 function getCompleteFiles(req,res){
     var study = req.query.study;
@@ -240,40 +258,40 @@ function getCompleteFiles(req,res){
         });
 
     } else if (!study && doctype) {
-        collection.find({doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
+        db.collection(FILEUPLOADS_COLLECTION).find({doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs) {
             console.log(docs);
             res.status(200).json(docs)
         })
     } else if (study && !doctype) {
         if(!visit){
-            collection.find({study:study,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
         }
     } else if (study && doctype) {
         if(!visit){
-            collection.find({study:study,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else if (!session) {
-            collection.find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
         } else {
-            collection.find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).then((docs) => {
+            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                 console.log(docs);
                 res.status(200).json(docs)
             })
@@ -406,14 +424,14 @@ app.post('/files/temp/new/',function(req,res){
 //     });
 // };
 
-// app.get('/files/:id', function (req, res) {
-//     var id = req.query.id;
-//     if (!id) {
-//         res.status(500).send('No document ID provided')
-//     } else {
-//         getFilebyID(res,id);
-//     }
-// });
+app.get('/file/', function (req, res) {
+    var id = req.query.id;
+    if (!id) {
+        res.status(500).send('No document ID provided');
+    } else {
+        getFilebyID(res,id);
+    }
+});
 
 // app.post('/test/',function(req,res){
 //     insertDocument(res,TEST_COLLECTION,req.body);
@@ -513,9 +531,16 @@ app.post('/insert/sleepScoring/', function(req,res){
 });
 
 
-app.post('/insert/sleepScoring/', function(req,res){
-    insertDocument(res, SLEEPSCORES_COLLECTION, req.body);
+// app.post('/insert/sleepScoring/', function(req,res){
+//     insertDocument(res, SLEEPSCORES_COLLECTION, req.body);
+// });
+
+app.post('/update/', function(req,res){
+    updateParsedDocument(res, req.body.id);
 });
+
+
+// function updateDocument(res,collection_name,identifier,change) {
 
 // db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
 //     if (err) {

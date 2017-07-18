@@ -55,7 +55,7 @@ def parseAndUpdateDocument(_file):
     jsonObject['session']=_file['session']
     jsonObject['sourceID']=_file['_id']
 
-    insertSleepScoreRequest = requests.post("http://127.0.0.1:8001/insert/sleepScoring/", data = jsonObject)
+    insertSleepScoreRequest = requests.post("http://127.0.0.1:8001/sleepScores/", data = jsonObject)
     updateFileUploadRequest = requests.post("http://127.0.0.1:8001/update/", data = {'id':_file['_id']})
     print(_file['path'],insertSleepScoreRequest.status_code,updateFileUploadRequest.status_code)
 

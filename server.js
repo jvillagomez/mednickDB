@@ -78,11 +78,11 @@ function insertDocument(res,collection_name,data) {
     data.dateUploaded = Date.now();
     db.collection(collection_name).insert(data, function (err,doc){
         if(err){
-            res.status(code || 500).json({"error": message});
+            res.status(500).json({"error": err});
         }
         else {
             res.status(201).json(doc);
-            console.log("inserted!");
+            // console.log("inserted!");
         }
     });
 };
@@ -100,104 +100,104 @@ function updateParsedDocument(res,id) {
          }
          else {
              res.status(201).json(doc);
-             console.log("updated!");
+            //  console.log("updated!");
          }
      });
 };
-//
-// function CheckDir(res,file_path,dir_path,file_object,data,callback){
-//     if (!fs.existsSync(dir_path)){
-//         console.log('Dir does not exist yet');
-//         mkpath(dir_path, function (err) {
-//             console.log("Crip niggas");
-//             if (err){
-//                 console.log('Error creating fileDir');
-//                 console.error(err);
-//                 return res.status(500).send(err);
-//             }
-//             else {
-//                 console.log('fileDir created successfully');
-//                 console.log(dir_path);
-//                 callback(res,file_path,dir_path,file_object,data)
-//             }
-//         });
-//     }
-//     else {
-//         callback(res,file_path,dir_path,file_object,data)
-//     }
-//
-//     // console.log("done checking DIR");
-//     // callback(res,file_path,dir_path,file_object,data);
-// };
-//
-// function uploadFile(res,file_path,dir_path,file_object,data){
-//     console.log("HITS UPLAOD FILE");
-//     if(!fs.existsSync(file_path)){
-//         file_object.mv(file_path, function(err){
-//             console.log(dir_path);
-//             if(err){
-//                 console.log("Error in file upload");
-//                 console.log(err);
-//                 return res.status(500).send(err);
-//             }
-//             else {
-//                 console.log("File successfully moved");
-//                 insertDocument(res,FILEUPLOADS_COLLECTION,data)
-//             }
-//         })
-//     }
-//     else {
-//         return res.status(500).send("File already exists!");
-//     }
-//     // console.log("HITTING UPLOAD FILE FUNC");
-// }
-//
-// function isComplete(data){
-//     var metadata = [
-//         data.study,
-//         data.visit,
-//         data.session,
-//         data.doctype
-//     ];
-//
-//     // console.log(metadata);
-//
-//     for (attribute of metadata) {
-//         if(!attribute){
-//             // console.log("false");
-//             return false
-//         }
-//     }
-//     console.log("true");
-//     return true
-// };
-//
-// function completeUpload(res,file_object,data){
-//     data.complete = "1";
-//     var study = (data.study).trim();
-//     var visit = (data.visit).trim();
-//     var session = (data.session).trim();
-//     var doctype = (data.doctype).trim();
-//     var file_name = (data.filename).trim();
-//
-//     var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
-//     var file_path = path.join(dir_path, file_name);
-//     data.path = file_path;
-//
-//     CheckDir(res,file_path,dir_path,file_object,data,uploadFile);
-//
-//
-// };
-//
-// function incompleteUpload(res,file_object,data){
-//     data.complete = "0";
-//     // console.log(data.filename);
-//     // console.log(TEMP_DIR);
-//     var file_path = path.join(TEMP_DIR,data.filename);
-//     data.path = file_path;
-//     uploadFile(res,file_path,TEMP_DIR,file_object,data);
-// };
-//
+
+function CheckDir(res,file_path,dir_path,file_object,data,callback){
+    if (!fs.existsSync(dir_path)){
+        console.log('Dir does not exist yet');
+        mkpath(dir_path, function (err) {
+            console.log("Crip niggas");
+            if (err){
+                console.log('Error creating fileDir');
+                console.error(err);
+                return res.status(500).send(err);
+            }
+            else {
+                console.log('fileDir created successfully');
+                console.log(dir_path);
+                callback(res,file_path,dir_path,file_object,data)
+            }
+        });
+    }
+    else {
+        callback(res,file_path,dir_path,file_object,data)
+    }
+
+    // console.log("done checking DIR");
+    // callback(res,file_path,dir_path,file_object,data);
+};
+
+function uploadFile(res,file_path,dir_path,file_object,data){
+    console.log("HITS UPLAOD FILE");
+    if(!fs.existsSync(file_path)){
+        file_object.mv(file_path, function(err){
+            console.log(dir_path);
+            if(err){
+                console.log("Error in file upload");
+                console.log(err);
+                return res.status(500).send(err);
+            }
+            else {
+                console.log("File successfully moved");
+                insertDocument(res,FILEUPLOADS_COLLECTION,data)
+            }
+        })
+    }
+    else {
+        return res.status(500).send("File already exists!");
+    }
+    // console.log("HITTING UPLOAD FILE FUNC");
+}
+
+function isComplete(data){
+    var metadata = [
+        data.study,
+        data.visit,
+        data.session,
+        data.doctype
+    ];
+
+    // console.log(metadata);
+
+    for (attribute of metadata) {
+        if(!attribute){
+            // console.log("false");
+            return false
+        }
+    }
+    console.log("true");
+    return true
+};
+
+function completeUpload(res,file_object,data){
+    data.complete = "1";
+    var study = (data.study).trim();
+    var visit = (data.visit).trim();
+    var session = (data.session).trim();
+    var doctype = (data.doctype).trim();
+    var file_name = (data.filename).trim();
+
+    var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
+    var file_path = path.join(dir_path, file_name);
+    data.path = file_path;
+
+    CheckDir(res,file_path,dir_path,file_object,data,uploadFile);
+
+
+};
+
+function incompleteUpload(res,file_object,data){
+    data.complete = "0";
+    // console.log(data.filename);
+    // console.log(TEMP_DIR);
+    var file_path = path.join(TEMP_DIR,data.filename);
+    data.path = file_path;
+    uploadFile(res,file_path,TEMP_DIR,file_object,data);
+};
+
 
 //=============================================================================
 
@@ -225,7 +225,7 @@ function updateParsedDocument(res,id) {
 // };
 
 //===========================================================================================
-//
+
 // function getFilebyID(res,id){
 //     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
 //         if (err) {
@@ -237,7 +237,7 @@ function updateParsedDocument(res,id) {
 //         }
 //     });
 // };
-//
+
 function getCompleteFiles(req,res){
     var study = req.query.study;
     var visit = req.query.visit;
@@ -448,7 +448,7 @@ app.get('/',function(req,res){
 
 // START [DROPDOWN Selections]
 // ==================================================
-//
+
 // app.get('/getStudies/', function(req,res){
 //     db.collection(FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
 //         if (err) {
@@ -458,7 +458,7 @@ app.get('/',function(req,res){
 //         }
 //     }));
 // });
-//
+
 // app.get('/getVisits/', function(req,res){
 //     var study = req.query.study
 //     console.log(study);
@@ -471,7 +471,7 @@ app.get('/',function(req,res){
 //         }
 //     }));
 // });
-//
+
 // app.get('/getSessions/', function(req,res){
 //     var study = req.query.study
 //     var visit = req.query.visit
@@ -486,7 +486,7 @@ app.get('/',function(req,res){
 //         }
 //     }));
 // });
-//
+
 // app.get('/getDocTypes/', function(req,res){
 //     db.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
 //         if (err) {
@@ -496,6 +496,7 @@ app.get('/',function(req,res){
 //         }
 //     }));
 // });
+
 // // ==================================================
 // END [DROPDOWN Selections]
 
@@ -508,8 +509,8 @@ app.post('/screenings/', function(req,res){
 });
 
 app.post('/update/', function(req,res){
-    console.log("HIT IT");
-    // updateParsedDocument(res, req.body.id);
+    // console.log("HIT IT");
+    updateParsedDocument(res, req.body.id);
 });
 
 app.get('/sleepScores/', function(req,res){

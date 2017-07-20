@@ -1,0 +1,58 @@
+button,
+select,
+html,
+textarea,
+input {
+    font-family: "Oswald", sans-serif;
+}
+
+h1 {
+    font-family: "Oswald", sans-serif;
+}
+
+h3 {
+    font-family: "Oswald", sans-serif;
+}
+
+p {
+    font-family: "Oswald", sans-serif;
+}
+
+blockquote {
+    font-family: "Oswald", sans-serif;
+}
+
+pre {
+    font-family: "Oswald", sans-serif;
+}
+
+body {
+    //height: 100vh;
+}
+
+.content {
+    &.content-public {
+        background: #67b26f;
+        /* fallback for old browsers */
+        background: -webkit-linear-gradient(to left, #67b26f, #4ca2cd);
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to left, #67b26f, #4ca2cd);
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    }
+    &.content-private {
+        background-color: rgba(0, 0, 0, .025);
+    }
+}
+
+.layout-toolbar {
+    height: 64px;
+    .logo {
+        width: 3.125rem;
+        height: 3.125rem;
+        padding-right: 5px;
+        cursor: pointer;
+    }
+    .title {
+        font-size: 28px;
+    }
+}

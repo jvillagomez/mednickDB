@@ -11,6 +11,7 @@ var ObjectId = require('mongodb').ObjectID;
 var monk = require('monk');
 var cors = require('cors');
 var upload = require('../functions/upload.js')
+var general = require('../../generalFunctions/general')
 
 var router = express.Router();
 
@@ -24,7 +25,7 @@ router.post('/upload/',function(req,res){
         console.log("No file was uploaded")
         return res.status(400).send('No files were uploaded.')
     } else {
-        var entry = req.body;
+        var data = req.body;
         var fileQuantity = (req.files.docfile).length;
         if (fileQuantity)
         {
@@ -32,11 +33,13 @@ router.post('/upload/',function(req,res){
             file_objects.forEach(function(file_object) {
                 console.log(file_object);
 
-                entry.filename = file_object.name;
-                entry.expired = "0";
-                entry.uploadedBy = "stude001@ucr.edu";
+                data.filename = file_object.name;
+                data.expired = "0";
+                data.uploadedBy = "stude001@ucr.edu";
 
-                upload.incompleteUpload(res,file_object,entry);
+                // upload.incompleteUpload(res,file_object,data,function(res, ){
+
+                // });
             });
         }
 
@@ -45,14 +48,21 @@ router.post('/upload/',function(req,res){
             var file_object = req.files.docfile;
             console.log(file_object);
 
-            var complete = upload.isComplete(entry);
+            var complete = upload.isComplete(data);
+            console.log(complete);
 
-            entry.filename = file_object.name;
-            entry.expired = "0"
-            entry.uploadedBy = "stude001@ucr.edu";
+            data.filename = file_object.name;
+            data.expired = "0"
+            data.uploadedBy = "stude001@ucr.edu";
 
             if (complete) {
-                upload.completeUpload(res,file_object,entry);
+                upload.completeUpload(res,file_object,data,function(res,dir_path,file_object,data){
+                    upload.checkDir(res,dir_path,file_object,data,function(res,dir_path,file_object,data){
+                        upload.uploadFile(res,dir_path,file_object,data,function(res,data){
+                            general.insertDocument(res, general.FILEUPLOADS_COLLECTION, data);
+                        })
+                    })
+                });
             } else {
                 upload.incompleteUpload(res,file_object,entry,upload.CheckDir);
             }

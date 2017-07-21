@@ -12,6 +12,7 @@ var ObjectId = require('mongodb').ObjectID;
 var monk = require('monk');
 var cors = require('cors');
 var upload = require('./DocumentUpload/functions/upload.js')
+var general = require('./generalFunctions/general')
 
 // var db = monk('localhost:27017/mednick');
 var app = express();

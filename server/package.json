@@ -1,28 +1,17 @@
 {
-  "name": "MEAN",
-  "version": "1.0.0",
-  "description": "App for streamlined data collection in sleep studies.",
-  "main": "server.js",
+  "name": "mednickdb",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node ./bin/www",
+    "devstart": "nodemon ./bin/www"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://git.heroku.com/nameless-gorge-67845.git"
-  },
-  "keywords": [
-    "MEAN",
-    "Express",
-    "Angular"
-  ],
-  "author": "Juan Antonio Villlagomez",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jvillagomez/mednick/issues"
-  },
-  "homepage": "https://github.com/jvillagomez/mednick",
   "dependencies": {
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.3",
+    "morgan": "~1.8.1",
+    "serve-favicon": "~2.4.2",
+
     "async": "^2.5.0",
     "body-parser": "^1.17.1",
     "cors": "^2.8.3",
@@ -32,5 +21,8 @@
     "mkpath": "^1.0.0",
     "mongodb": "^2.2.26",
     "monk": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }

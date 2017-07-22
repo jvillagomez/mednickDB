@@ -7,10 +7,14 @@ var router = express.Router();
 var fileUpload = require('express-fileupload');
 var path = require('path');
 var bodyParser = require('body-parser');
-var mongo = require('mongodb');
 var ObjectId = require('mongodb').ObjectID;
-var monk = require('monk');
-var cors = require('cors');
+
+var DataTableController = require('../controllers/dataTable_Controller')
+var DocumentBrowseController = require('../controllers/documentBrowse_Controller')
+var DocumentDownloadController = require('../controllers/documentDownload_Controller')
+var DocumentUpdateController = require('../controllers/documentUpdate_Controller')
+var DocumentUploadController = require('../controllers/documentUpload_Controller')
+var GeneralController = require('../controllers/general_Controller')
 
 var CWD = process.cwd();
 var UPLOAD_TO = path.join(CWD,"uploads/mednickFileSystem")
@@ -21,19 +25,14 @@ module.exports = {
     upload_to : UPLOAD_TO,
     temp_dir: TEMP_DIR,
 
-    uploadFile: function (res,file_path,dir_path,file_object,data,callback) {
-        console.log("HITS uploadFile");
-        if(!fs.existsSync(file_path)){
-          file_object.mv(file_path, function(err){
-              console.log(dir_path);
+    uploadFile: function (res,dir_path,file_object,data,db,callback) {
+        if(!fs.existsSync(data.path)){
+          file_object.mv(data.path, function(err){
               if(err){
-                  console.log("Error in file upload");
                   return handleError(res,err);
               }
               else {
-                  console.log("File successfully moved");
-                  callback();
-                //   insertDocument(res,FILEUPLOADS_COLLECTION,data)
+                  callback(res, GeneralController.FILEUPLOADS_COLLECTION, data, db);
               }
           })
         }
@@ -41,8 +40,7 @@ module.exports = {
           return res.status(500).send("File already exists!");
         }
     },
-    completeUpload: function (res,file_object,data,callback) {
-        console.log("HITS completeUpload");
+    completeUpload: function (res,file_object,data,db,callback) {
         data.complete = "1";
         var study = (data.study).trim();
         var visit = (data.visit).trim();
@@ -53,40 +51,31 @@ module.exports = {
         var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
         var file_path = path.join(dir_path, file_name);
         data.path = file_path;
-        console.log(data);
-        callback(res, dir_path, file_object, data);
-        //   callback(res,file_path,dir_path,file_object,data,uploadFile);
+        callback(res, dir_path, file_object, data, db)
     },
-    incompleteUpload: function (res,file_object,data,callback) {
-        console.log("HITS incompleteUpload");
+    incompleteUpload: function (res,file_object,data,db,callback) {
         data.complete = "0";
         var file_path = path.join(TEMP_DIR,data.filename);
         data.path = file_path;
         callback();
         //   uploadFile(res,file_path,TEMP_DIR,file_object,data);
     },
-    checkDir: function (res,dir_path,file_object,data,callback) {
-        console.log("HITS checkDir");
+    checkDir: function (res,dir_path,file_object,data,db,callback) {
         if (!fs.existsSync(dir_path)){
-          console.log('Dir does not exist yet');
           mkpath(dir_path, function (err) {
               if (err){
-                  console.log('Error creating fileDir');
                   return handleError(res,err);
               }
               else {
-                  console.log('fileDir created successfully');
-                  callback(res,dir_path,file_object,data)
+                  callback(res,dir_path,file_object,data,db)
               }
           });
         }
         else {
-        //   callback();
-          callback(res,dir_path,file_object,data)
+          callback(res,dir_path,file_object,data,db)
         }
     },
     isComplete: function (data) {
-        console.log("HITS isComplete");
         var metadata = [
           data.study,
           data.visit,

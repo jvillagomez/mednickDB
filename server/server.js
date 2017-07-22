@@ -11,28 +11,14 @@ var mongo = require('mongodb');
 var ObjectId = require('mongodb').ObjectID;
 var monk = require('monk');
 var cors = require('cors');
-var upload = require('./DocumentUpload/functions/upload.js')
-var general = require('./generalFunctions/general')
 
-// var db = monk('localhost:27017/mednick');
 var app = express();
 
-// var CWD = process.cwd();
-//
-// var UPLOAD_TO = path.join(CWD,"uploads/mednickFileSystem")
-// var TEMP_DIR = path.join(CWD,"uploads/temp")
+var initializeDatabases = require('./dbs');
 // ==============================================================
 process.env.PWD = process.cwd();
 var PUBLIC_PATH = path.resolve(process.env.PWD + '/public');
-var MONGODB_URI = "mongodb://user1:Pass1234@ds123312.mlab.com:23312/mednick"
 
-var SLEEPSCORES_COLLECTION = "sleepScores"
-var SLEEPDIARIES_COLLECTION = "sleepDiaries"
-var SCREENINGS_COLLECTION = "screenings"
-var FILEUPLOADS_COLLECTION = "fileUploads";
-var TEST_COLLECTION = "test";
-
-app.set('port', (process.env.PORT || 8001));
 // ==============================================================
 app.use('/public', express.static(PUBLIC_PATH));
 app.use(bodyParser.urlencoded({ extended:true }));
@@ -40,113 +26,136 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 app.use(cors());
 
-app.use(function(req,res,next){
-    req.db = db;
-    next();
-});
+// app.use(function(req,res,next){
+//     req.db = db;
+//     next();
+// });
 
-// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
-var db;
+var DocumentBrowseRoutes = require('./routes/documentBrowse_Routes')
+var DocumentUploadRoutes = require('./routes/documentUpload_Routes')
+var DocumentUpdateRoutes = require('./routes/documentUpdate_Routes')
+var DataTableRoutes = require('./routes/dataTable_Routes')
+var InsertDataRoutes = require('./routes/insertData_Routes')
 
-// Connect to the database before starting the application server.
-// mongo.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
-mongo.MongoClient.connect(MONGODB_URI, function (err, database) {
+initializeDatabases(function(err, dbs) {
   if (err) {
-    console.log(err);
-    console.log("exits");
+    console.error('Failed to make all database connections!');
+    console.error(err);
     process.exit(1);
   }
 
-  // Save database object from the callback for reuse.
-  db = database;
-  console.log("Database connection ready");
+  // Initialize the application once database connections are ready.
+  DocumentBrowseRoutes(app, dbs);
+  DocumentUploadRoutes(app, dbs);
+  DocumentUpdateRoutes(app, dbs);
+  DataTableRoutes(app, dbs);
+  InsertDataRoutes(app, dbs);
 
-  // Initialize the app.
-  // var server = app.listen(process.env.PORT || 8080, function () {
-  var server = app.listen(process.env.PORT || 8001, function () {
-    var port = server.address().port;
-    console.log("App now running on port", port);
+  app.listen(8001, function() {
+    console.log('Listening on port 8001');
   });
 });
 
 
-function getCompleteFiles(req,res){
-    var study = req.query.study;
-    var visit = req.query.visit;
-    var session = req.query.session;
-    var doctype = req.query.doctype;
+//=============================================================================
 
-    if(!study && !doctype){
-        db.collection(FILEUPLOADS_COLLECTION).find({complete:"1",expired:"0"}).toArray(function(err,docs){
-            if (err) {
-              handleError(res, err.message, "Failed to get complete docs.");
-            } else {
-              res.status(200).json(docs);
-            }
-        });
+// function downloadFileByID(res,id){
+//     // db.collection(FILEUPLOADS_COLLECTION).find({_id:id,expired:"0"}).toArray(function(err,docs){
+//     db.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
+//         if (!docs) {
+//             res.status(404).send(("No document found matching"+id));
+//         } else {
+//             console.log("If no filepath printed below, theres an error.");
+//             console.log(docs);
+//             var fileName = docs[0].path
+//             console.log("filename:",fileName);
+//             res.sendFile(fileName, function (err) {
+//                 if (err) {
+//                     console.log("Error serving file object");
+//                     console.log(err)
+//                     res.status(404).send(err);
+//                 } else {
+//                     console.log('Sent:', fileName);
+//                 }
+//             });
+//         }
+//     });
+// };
 
-    } else if (!study && doctype) {
-        db.collection(FILEUPLOADS_COLLECTION).find({doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs) {
-            res.status(200).json(docs)
-        })
-    } else if (study && !doctype) {
-        if(!visit){
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        } else if (!session) {
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        } else {
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        }
-    } else if (study && doctype) {
-        if(!visit){
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        } else if (!session) {
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        } else {
-            db.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
-                res.status(200).json(docs)
-            })
-        }
-    } else {
-        console.log("If youre seeing this somthing is completely fucked up in the request :)");
-    }
-};
+// function deleteFile(){
+// };
 
-function getTempFiles(res){
-    db.collection(FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
-        if (err) {
-          handleError(res, err);
-        } else {
-          res.status(200).json(docs);
-        }
-    });
-};
+// function editUpload(){
+// };
 
-
-app.get('/files/',function(req,res){
-    getCompleteFiles(req,res);
-});
-
-app.get('/files/temp/',function(req,res){
-    getTempFiles(res);
-});
-
-app.use(require('./DocumentUpload/routes/upload'));
-
-
-
-// ==============================================================
-// START [server instance]
-// app.listen(app.get('port'), function() {
-//     console.log('Node app is running on port', app.get('port'));
+// app.get('/files/download/', function (req, res) {
+//     var id = req.query.id;
+//     if (!id) {
+//         res.status(500).send('No Doc ID provided')
+//     } else {
+//         downloadFileByID(res,id);
+//     }
 // });
+
+// app.post('/files/delete/',function(req,res){
+//     var id = req.query.id;
+//     if (!id) {
+//         res.status(500).send('No document ID provided')
+//     } else {
+//         getFilebyID(res,id);
+//     }
+// });
+
+// function moveFile(loc,dest){
+//     if (loc == dest) {
+//         console.log('No need to move.');
+//         res.status(200).send('No need to move.')
+//     }
+//     else {
+//
+//     }
+//
+// callback;
+// };
+
+// function expireDocument(res,id){
+//     db.collection.findOneAndUpdate(
+//         {_id:ObjectId(id),expired:"0"},
+//         {expired:"1"},function(err,docs){
+//             if (err) {
+//                 console.log(err);
+//                 handleError(res, err.message, "Failed to update record. Maybe it doesnt exist. Read Err.");
+//             } else {
+//                 console.log("UPDATED SUCCESS");
+//                 res.status(200).json(docs);
+//             }
+//     });
+// };
+
+app.get('/',function(req,res){
+    res.status(200).send("Success placing GET call.");
+});
+
+// app.post('/files/:id', function (req, res) {
+//     var id = req.params.id;
+//     if (!id) {
+//         console.log("No Document ID provided");
+//         return res.status(500).send('No document ID provided')
+//     } else {
+//         db.collection(FILEUPLOADS_COLLECTION).update({_id:id,expired:"0"},{expired:"1",expiredDate:Date.now()}).then((docs) => {
+//             if(err){
+//                 console.log("Error updating document record")
+//                 console.log(err);
+//                 return res.status(500).json(err);
+//             }
+//             else {
+//                 console.log("Record was updated accordingly")
+//                 return res.status(200).json(req.body);
+//             }
+//         });
+//     }
+// });
+
+
+// // ==================================================
+// END [DROPDOWN Selections]

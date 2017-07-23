@@ -27,7 +27,12 @@ router.use(function timeLog(req, res, next) {
 
 
 module.exports = function(app,db){
-    app.post('/upload/',function(req,res){
+    /**
+     * @api {post} /FileUpload Upload new file
+     * @apiName PostFileUpload
+     * @apiGroup DocumentUpload
+     */
+    app.post('/FileUpload',function(req,res){
         if(!req.files){
             return res.status(400).send('No files were uploaded.')
         } else {
@@ -44,7 +49,7 @@ module.exports = function(app,db){
                     data.uploadedBy = "stude001@ucr.edu";
 
                     // upload.incompleteUpload(res,file_object,data,function(res, ){
-// TODO finish this multiple file upload
+                    // TODO finish this multiple file upload
                     // });
                 });
             }
@@ -70,12 +75,17 @@ module.exports = function(app,db){
                     upload.incompleteUpload(res,file_object,entry,upload.CheckDir);
                 }
             }
-// TODO fis this, idk wth is going on with this return
+            // TODO fis this, idk wth is going on with this return
             return// res.status(201).json("Uploading successfull");
         }
     });
 
-    app.post('/files/temp/new/',function(req,res){
+    /**
+     * @api {post} /NewTempFile Create new record for incomplete file
+     * @apiName PostNewTempFile
+     * @apiGroup DocumentUpload
+     */
+    app.post('/NewTempFile',function(req,res){
         insertDocument(res,FILEUPLOADS_COLLECTION,req.body);
     });
 }

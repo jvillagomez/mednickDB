@@ -26,8 +26,13 @@ router.use(function timeLog(req, res, next) {
 });
 
 module.exports = function(app,db){
-    app.post('/update/', function(req,res){
-        DocumentUpdateController.updateParsedDocument(res, req.body.id,db);
+    /**
+     * @api {post} /UpdateParsedStatus Update "parsed" for fileupload by ID
+     * @apiName PostUpdateParsedStatus
+     * @apiGroup DocumentUpdate
+     */
+    app.post('/UpdateParsedStatus', function(req,res){
+        DocumentUpdateController.updateParsedDocument(res, req.body.id, db);
     });
 }
 

@@ -1,0 +1,8 @@
+{
+    "name": "MednickDB docs",
+    "version": "1.0.0",
+    "description": "API endpoint listing",
+    "template": {
+        "forceLanguage": "en"
+    }
+}

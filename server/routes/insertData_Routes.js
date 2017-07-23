@@ -30,7 +30,12 @@ module.exports = function(app,db){
         GeneralController.insertDocument(res, GeneralController.SLEEPSCORES_COLLECTION, req.body, db);
     });
 
-    app.post('/screenings/', function(req,res){
+    /**
+     * @api {post} /Screenings Post new screening records
+     * @apiName PostScreenings
+     * @apiGroup InsertData
+     */
+    app.post('/Screenings', function(req,res){
         GeneralController.insertDocument(res, GeneralController.SCREENINGS_COLLECTION, req.body, db);
     });
 }

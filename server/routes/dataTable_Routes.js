@@ -25,6 +25,11 @@ router.use(function timeLog(req, res, next) {
 });
 
 module.exports = function(app,db){
+    /**
+     * @api {get} /sleepScores Request all sleepscoring records
+     * @apiName SleepScores
+     * @apiGroup DataTable
+     */
     app.get('/sleepScores/', function(req,res){
         db.dev.collection(SLEEPSCORES_COLLECTION).find({}).toArray(function(err,docs){
             if (err) {
@@ -35,6 +40,11 @@ module.exports = function(app,db){
         });
     });
 
+    /**
+     * @api {get} /screenings Request all screening records
+     * @apiName Screenings
+     * @apiGroup DataTable
+     */
     app.get('/screenings/', function(req,res){
         db.dev.collection(SCREENINGS_COLLECTION).find({}).toArray(function(err,docs){
             if (err) {

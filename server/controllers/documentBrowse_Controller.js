@@ -49,34 +49,34 @@ module.exports = {
             });
 
         } else if (!study && doctype) {
-            db.dev.collection(FILEUPLOADS_COLLECTION).find({doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs) {
+            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs) {
                 res.status(200).json(docs)
             })
         } else if (study && !doctype) {
             if(!visit){
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             } else if (!session) {
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,visit:visit,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             } else {
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             }
         } else if (study && doctype) {
             if(!visit){
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             } else if (!session) {
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,visit:visit,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             } else {
-                db.dev.collection(FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
+                db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({study:study,visit:visit,session:session,doctype:doctype,complete:"1",expired:"0"}).toArray(function(err,docs){
                     res.status(200).json(docs)
                 })
             }
@@ -85,12 +85,12 @@ module.exports = {
         }
     },
     getFilebyID: function(res,id,db){
-        db.dev.collection(FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({_id: ObjectId(id),expired:"0"}).toArray(function(err,docs){
             if (err) {
                 GeneralController.handleError(res, err.message, "Failed to get temp records.");
             } else {
                 var data = docs[0]
-                console.log(data);
+                // console.log(data);
                 res.status(200).json(data)
             }
         });

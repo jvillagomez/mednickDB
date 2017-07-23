@@ -29,8 +29,13 @@ router.use(function timeLog(req, res, next) {
 module.exports = function(app,db){
     // START [DROPDOWN Selections]
     // ==================================================
-    app.get('/getStudies/', function(req,res){
-        db.dev.collection(FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
+    /**
+     * @api {get} /Studies Request all unique study IDs
+     * @apiName GetStudies
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/Studies', function(req,res){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
             if (err) {
               handleError(res, err.message, "Failed to get studies.");
             } else {
@@ -39,11 +44,16 @@ module.exports = function(app,db){
         }));
     });
 
-    app.get('/getVisits/', function(req,res){
+    /**
+     * @api {get} /Visits Request all unique visit IDs
+     * @apiName GetVisits
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/Visits', function(req,res){
         var study = req.query.study
         console.log(study);
 
-        db.dev.collection(FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
             if (err) {
               handleError(res, err.message, "Failed to get visits.");
             } else {
@@ -52,13 +62,18 @@ module.exports = function(app,db){
         }));
     });
 
-    app.get('/getSessions/', function(req,res){
+    /**
+     * @api {get} /Sessions Request all unique session IDs
+     * @apiName GetSessions
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/Sessions', function(req,res){
         var study = req.query.study
         var visit = req.query.visit
         console.log(study);
         console.log(visit);
 
-        db.dev.collection(FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
             if (err) {
               handleError(res, err.message, "Failed to get Sessions.");
             } else {
@@ -67,8 +82,13 @@ module.exports = function(app,db){
         }));
     });
 
-    app.get('/getDocTypes/', function(req,res){
-        db.dev.collection(FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
+    /**
+     * @api {get} /DocumentTypes Request all unique DocumentTypes
+     * @apiName GetDocumentTypes
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/DocumentTypes', function(req,res){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
             if (err) {
               handleError(res, err.message, "Failed to get visits.");
             } else {
@@ -79,13 +99,23 @@ module.exports = function(app,db){
     // ==================================================
     // END [DROPDOWN Selections]
 
-    // START [FIle Records]
+    // START [File Records]
     // ==================================================
-    app.get('/files/',function(req,res){
+    /**
+     * @api {get} /Files Request all complete fileupload records
+     * @apiName GetFiles
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/Files',function(req,res){
         DocumentBrowseController.getCompleteFiles(req,res,db);
     });
 
-    app.get('/file/', function (req, res) {
+    /**
+     * @api {get} /File Request fileupload record by ID
+     * @apiName GetFile
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/File', function (req, res) {
         var id = req.query.id;
         if (!id) {
             res.status(500).send('No document ID provided');
@@ -94,7 +124,12 @@ module.exports = function(app,db){
         }
     });
 
-    app.get('/files/temp/',function(req,res){
+    /**
+     * @api {get} /TempFiles Request all incomplete FILEUPLOAD records
+     * @apiName GetTempFiles
+     * @apiGroup DocumentBrowse
+     */
+    app.get('/TempFiles/',function(req,res){
         console.log("inside files/temp/ route");
         console.log(db);
         DocumentBrowseController.getTempFiles(res,db);

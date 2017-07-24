@@ -31,6 +31,39 @@ module.exports = function(app,db){
      * @api {post} /FileUpload Upload new file
      * @apiName PostFileUpload
      * @apiGroup DocumentUpload
+
+     * @apiDescription Supports single, and bulk upload requests.
+     *
+     * CompleteFileDir = "/study/visit/session/doctype/filename.ext"
+     *
+     * TempFileDir = "/temp/filename.ext"
+     *
+     * Single uploads, with "study", "visit", "session", and "doctype" provided in request, will be stored in CompleteFileDir.
+     *
+     * Single uploads, with "study", "visit", "session", or "doctype" missing in request, will be stored in TempFileDir.
+     *
+     * Bulk uploads apply same metada to all files in object-array and are automatically placed in TempFileDir.
+
+     * @apiParam {Object} docfile               File object (or array of file objects) that will be uploaded.
+     * @apiParam {String} [study=Null]          Study ID. Neccesary for "complete" upload.
+     * @apiParam {String} [visit=Null]          Visit ID. Neccesary for "complete" upload.
+     * @apiParam {String} [session=Null]        Session ID. Neccesary for "complete" upload.
+     * @apiParam {String} [doctype=Null]        Doctype ID. Neccesary for "complete" upload.
+     * @apiParam {String} [notes=Null]          Notes, text field.
+     *
+     * @apiExample Example usage:
+     * curl -i http://localhost/user/4711
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "firstname": "John",
+     *       "lastname": "Doe"
+     *     }
+
+
+
+
      */
     app.post('/FileUpload',function(req,res){
         if(!req.files){
@@ -81,11 +114,11 @@ module.exports = function(app,db){
     });
 
     /**
-     * @api {post} /NewTempFile Create new record for incomplete file
-     * @apiName PostNewTempFile
+     * @api {post} /NewTempFileRecord Create new record for incomplete file
+     * @apiName PostNewTempFileRecord
      * @apiGroup DocumentUpload
      */
-    app.post('/NewTempFile',function(req,res){
+    app.post('/NewTempFileRecord',function(req,res){
         insertDocument(res,FILEUPLOADS_COLLECTION,req.body);
     });
 }

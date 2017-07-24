@@ -105,15 +105,85 @@
     "title": "Upload new file",
     "name": "PostFileUpload",
     "group": "DocumentUpload",
+    "description": "<p>Supports single, and bulk upload requests.</p> <p>CompleteFileDir = &quot;/study/visit/session/doctype/filename.ext&quot;</p> <p>TempFileDir = &quot;/temp/filename.ext&quot;</p> <p>Single uploads, with &quot;study&quot;, &quot;visit&quot;, &quot;session&quot;, and &quot;doctype&quot; provided in request, will be stored in CompleteFileDir.</p> <p>Single uploads, with &quot;study&quot;, &quot;visit&quot;, &quot;session&quot;, or &quot;doctype&quot; missing in request, will be stored in TempFileDir.</p> <p>Bulk uploads apply same metada to all files in object-array and are automatically placed in TempFileDir.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "docfile",
+            "description": "<p>File object (or array of file objects) that will be uploaded.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "study",
+            "defaultValue": "Null",
+            "description": "<p>Study ID. Neccesary for &quot;complete&quot; upload.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "visit",
+            "defaultValue": "Null",
+            "description": "<p>Visit ID. Neccesary for &quot;complete&quot; upload.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "session",
+            "defaultValue": "Null",
+            "description": "<p>Session ID. Neccesary for &quot;complete&quot; upload.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "doctype",
+            "defaultValue": "Null",
+            "description": "<p>Doctype ID. Neccesary for &quot;complete&quot; upload.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "notes",
+            "defaultValue": "Null",
+            "description": "<p>Notes, text field.</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "curl -i http://localhost/user/4711",
+        "type": "json"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\"\n}",
+          "type": "json"
+        }
+      ]
+    },
     "version": "0.0.0",
     "filename": "routes/documentUpload_Routes.js",
     "groupTitle": "DocumentUpload"
   },
   {
     "type": "post",
-    "url": "/NewTempFile",
+    "url": "/NewTempFileRecord",
     "title": "Create new record for incomplete file",
-    "name": "PostNewTempFile",
+    "name": "PostNewTempFileRecord",
     "group": "DocumentUpload",
     "version": "0.0.0",
     "filename": "routes/documentUpload_Routes.js",

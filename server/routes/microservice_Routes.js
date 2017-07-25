@@ -26,7 +26,7 @@ router.use(function timeLog(req, res, next) {
 });
 
 module.exports = function(app,db){
-    app.post('/sleepScores/', function(req,res){
+    app.post('/TaskData', function(req,res){
         GeneralController.insertDocument(res, GeneralController.SLEEPSCORES_COLLECTION, req.body, db);
     });
 
@@ -35,7 +35,7 @@ module.exports = function(app,db){
      * @apiName PostScreenings
      * @apiGroup InsertData
      */
-    app.post('/Screenings', function(req,res){
+    app.post('/Screening', function(req,res){
         GeneralController.insertDocument(res, GeneralController.SCREENINGS_COLLECTION, req.body, db);
     });
 }

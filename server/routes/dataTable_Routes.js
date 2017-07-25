@@ -26,11 +26,11 @@ router.use(function timeLog(req, res, next) {
 
 module.exports = function(app,db){
     /**
-     * @api {get} /sleepScores Request all sleepscoring records
+     * @api {get} /SleepScores Request all sleepscoring records
      * @apiName SleepScores
      * @apiGroup DataTable
      */
-    app.get('/sleepScores/', function(req,res){
+    app.get('/SleepScores/', function(req,res){
         db.dev.collection(SLEEPSCORES_COLLECTION).find({}).toArray(function(err,docs){
             if (err) {
               handleError(res, err.message, "Failed to get SLEEPSCORE records.");
@@ -41,11 +41,11 @@ module.exports = function(app,db){
     });
 
     /**
-     * @api {get} /screenings Request all screening records
+     * @api {get} /Screenings Request all screening records
      * @apiName Screenings
      * @apiGroup DataTable
      */
-    app.get('/screenings/', function(req,res){
+    app.get('/Screenings/', function(req,res){
         db.dev.collection(SCREENINGS_COLLECTION).find({}).toArray(function(err,docs){
             if (err) {
               handleError(res, err.message, "Failed to get SCREENING records.");

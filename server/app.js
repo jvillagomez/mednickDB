@@ -23,7 +23,7 @@ var DocumentUploadRoutes = require('./routes/documentUpload_Routes')
 var DocumentUpdateRoutes = require('./routes/documentUpdate_Routes')
 var DocumentDeleteRoutes = require('./routes/documentDelete_Routes')
 var DataTableRoutes = require('./routes/dataTable_Routes')
-var InsertDataRoutes = require('./routes/insertData_Routes')
+var InsertDataRoutes = require('./routes/microservice_Routes')
 
 // var documentUpload = require('./routes/documentUpload');
 // var documentBrowse = require('./routes/documentBrowse');

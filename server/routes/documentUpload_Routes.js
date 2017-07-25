@@ -52,18 +52,39 @@ module.exports = function(app,db){
      * @apiParam {String} [notes=Null]          Notes, text field.
      *
      * @apiExample Example usage:
-     * curl -i http://localhost/user/4711
+     * http://localhost/FileUpload
      *
      * @apiSuccessExample {json} Success-Response:
-     *     HTTP/1.1 200 OK
+     *     HTTP/1.1 201 Created
      *     {
-     *       "firstname": "John",
-     *       "lastname": "Doe"
+     *        "result": {
+     *            "ok": 1,
+     *            "n": 1,
+     *            "opTime": {
+     *                "ts": "6446619355789656066",
+     *                "t": 2
+     *            }
+     *        },
+     *        "ops": [
+     *            {
+     *                "study": "study4",
+     *                "visit": "visit1",
+     *                "session": "session1",
+     *                "doctype": "screening",
+     *                "filename": "SF2014_ScreeningQuestionnaire_MASTER.xlsx",
+     *                "expired": "0",
+     *                "uploadedBy": "stude001@ucr.edu",
+     *                "complete": "1",
+     *                "path": "C:\\source\\mednickdb\\server\\uploads\\mednickFileSystem\\study4\\visit1\\session1\\screening\\SF2014_ScreeningQuestionnaire_MASTER.xlsx",
+     *                "dateUploaded": 1500970536176,
+     *                "_id": "5976fe28f9b6021654b762bb"
+     *            }
+     *        ],
+     *        "insertedCount": 1,
+     *        "insertedIds": [
+     *            "5976fe28f9b6021654b762bb"
+     *        ]
      *     }
-
-
-
-
      */
     app.post('/FileUpload',function(req,res){
         if(!req.files){
@@ -118,12 +139,45 @@ module.exports = function(app,db){
     });
 
     /**
-     * @api {post} /NewTempFileRecord Create new record for incomplete file
-     * @apiName PostNewTempFileRecord
+     * @api {post} /NewFileRecord Create new FileUpload record in DB
+     * @apiName PostNewFileRecord
      * @apiGroup DocumentUpload
+
+     * @apiDescription Creates a new FileUpload record with complete=0.
+     * Main use is for python microservice that scans tree for unlogged files.
+     *
+     * @apiExample Example usage:
+     * http://localhost/NewFileRecord
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 201 Created
+    *     {
+    *         "result": {
+    *             "ok": 1,
+    *             "n": 1,
+    *             "opTime": {
+    *                 "ts": "6446683947802820611",
+    *                 "t": 2
+    *             }
+    *         },
+    *         "ops": [
+    *             {
+    *                 "filename": "testFileName",
+    *                 "path": "testPath",
+    *                 "expired": "testExpired",
+    *                 "complete": "0",
+    *                 "dateUploaded": 1500985574333,
+    *                 "_id": "597738e658c1842420688aa9"
+    *             }
+    *         ],
+    *         "insertedCount": 1,
+    *         "insertedIds": [
+    *             "597738e658c1842420688aa9"
+    *         ]
+    *     }
      */
-    app.post('/NewTempFileRecord',function(req,res){
-        insertDocument(res,FILEUPLOADS_COLLECTION,req.body);
+    app.post('/NewFileRecord',function(req,res){
+        GeneralController.insertDocument(res, GeneralController.FILEUPLOADS_COLLECTION, req.body, db);
     });
 }
 

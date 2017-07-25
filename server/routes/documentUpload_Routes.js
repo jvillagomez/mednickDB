@@ -105,7 +105,11 @@ module.exports = function(app,db){
                         })
                     });
                 } else {
-                    upload.incompleteUpload(res,file_object,entry,upload.CheckDir);
+                    DocumentUploadController.incompleteUpload(res, file_object, data, db, function(res, temp_dir, file_object, data, db){
+                        DocumentUploadController.uploadFile(res, temp_dir, file_object, data, db, function(res, collection, data, db){
+                            GeneralController.insertDocument(res, collection, data, db);
+                        });
+                    });
                 }
             }
             // TODO fis this, idk wth is going on with this return

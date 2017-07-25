@@ -48,17 +48,19 @@ module.exports = {
         var doctype = (data.doctype).trim();
         var file_name = (data.filename).trim();
 
-        var dir_path = path.join(UPLOAD_TO, study, visit, session, doctype);
+        var dir_path = path.join(this.upload_to, study, visit, session, doctype);
         var file_path = path.join(dir_path, file_name);
         data.path = file_path;
         callback(res, dir_path, file_object, data, db)
     },
     incompleteUpload: function (res,file_object,data,db,callback) {
         data.complete = "0";
-        var file_path = path.join(TEMP_DIR,data.filename);
+        console.log(this.temp_dir);
+        console.log(data.filename);
+        var file_path = path.join(this.temp_dir,data.filename);
         data.path = file_path;
-        callback();
-        //   uploadFile(res,file_path,TEMP_DIR,file_object,data);
+        // callback();
+        callback(res,this.temp_dir,file_object,data,db);
     },
     checkDir: function (res,dir_path,file_object,data,db,callback) {
         if (!fs.existsSync(dir_path)){

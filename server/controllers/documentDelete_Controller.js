@@ -17,11 +17,11 @@ var DocumentUploadController = require('../controllers/documentUpload_Controller
 var GeneralController = require('../controllers/general_Controller')
 
 module.exports = {
-    updateParsedDocument: function (res,id,db) {
+    expireDocument: function (res,id,db) {
         db.collection(GeneralController.FILEUPLOADS_COLLECTION).updateOne(
            { _id: ObjectId(id) },
            {
-             $set: { "parsed": "1"},
+             $set: { "expired": "1"},
              $currentDate: { lastModified: true }
          },
          function(err,doc){
@@ -29,7 +29,7 @@ module.exports = {
                  res.status(500).json({"error": err});
              }
              else {
-                 res.status(201).json(doc);
+                 res.status(200).json(doc);
              }
          });
     }

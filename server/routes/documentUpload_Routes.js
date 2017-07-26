@@ -86,7 +86,7 @@ module.exports = function(app,db){
      *        ]
      *     }
      */
-    app.post('/FileUpload',function(req,res){
+    app.post('/UploadFile',function(req,res){
         if(!req.files){
             return res.status(400).send('No files were uploaded.')
         } else {

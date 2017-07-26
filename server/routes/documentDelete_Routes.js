@@ -28,8 +28,8 @@ router.use(function timeLog(req, res, next) {
 
 
 module.exports = function(app,db){
-    app.post('/upload/',function(req,res){
-        if(!req.files){
+    app.post('/DeleteFile',function(req,res){
+        if(!req.id){
             return res.status(400).send('No files were uploaded.')
         } else {
             var data = req.body;

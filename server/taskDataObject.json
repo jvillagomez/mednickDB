@@ -1,0 +1,71 @@
+Assuming subjectID is somewhere in file name
+-SubjectID in filename allows more than one task file in same dir.
+
+Do you want to also file/sort/query docs my subject.
+
+Can we assume all querrie parameters will only depend on screening/survey data and not the task data itself
+
+
+Otherwise structure needs to be changed to:
+
+/study/visit/session/doctype/subject
+
+Surveys (Multiple)
+Tasks (Individual)
+
+FileUpload
+{
+    "filename": "filename1",
+    "studyID": "study1",
+    "visitID": "visit1",
+    "sessionID": "session1",
+    "docInfo": {
+        "type": "Task",
+        "subjectID": "" (if survey, ommit) (else, parse on client for aray of subjectIDs)
+    },
+    "complete": "1",
+    "path": "study1/visit1/session1/doctype1/filename",
+    "uploadedBy": "student@ucr.edu",
+    "dateUploaded": 2456513464,
+    "expired": "0"
+}
+
+SurveyData
+{
+    "filename": "filename1",
+    "studyID": "study1",
+    "visitID": "visit1",
+    "sessionID": "session1",
+    "subjectID": "subject1",
+    "surveyType": "screening || diary || questionaire",
+    "dateRecorded":"",
+    "survey":{
+        "key1":"value1",
+        "key2":"value2"
+    },
+    "sourceID": 424574684,
+    "dateUploaded": 2456513464,
+    "expired": "0"
+}
+
+TaskData
+{
+    "filename": "filename1",
+    "studyID": "study1",
+    "visitID": "visit1",
+    "sessionID": "session1",
+    "doctypeID": "doctype1",
+
+    ===============================
+    "taskInfo":{
+        "recordStartTime"
+    },
+    "data":"",
+    "recordStart":"",
+    "epochTimes":"",
+    "epochStages":"",
+    ===============================
+    "sourceID": 424574684,
+    "dateUploaded": 2456513464,
+    "expired": "0"
+}

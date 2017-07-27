@@ -305,10 +305,47 @@ module.exports = function(app,db){
     *            }
     *        ]
      */
-    app.get('/TempFiles/',function(req,res){
+    app.get('/TempFiles',function(req,res){
         console.log("inside files/temp/ route");
         console.log(db);
         DocumentBrowseController.getTempFiles(res,db);
+    });
+    /**
+     * @api {get} /DeletedFiles Request all incomplete FileUpload records
+     * @apiName GetDeletedFiles
+     * @apiGroup DocumentBrowse
+     * @apiDescription Retrieve all deleted (expired) FileUpload records.
+     * Returns deteled fileupload records, not the file objects stored in fileserver.
+     * Places files in RECYCLE_BIN dir.
+
+     * @apiExample Example usage:
+     * http://localhost/DeletedFiles
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+    *        [
+    *            {
+    *                "_id": "597716d55c296c2418a0a74f",
+    *                "filename": "LSD Demographics.xlsx",
+    *                "expired": "1",
+    *                "uploadedBy": "stude001@ucr.edu",
+    *                "complete": "0",
+    *                "path": "C:\\source\\mednickdb\\server\\uploads\\temp\\LSD Demographics.xlsx",
+    *                "dateUploaded": 1500976853428
+    *            },
+    *            {
+    *                "_id": "597716e15c296c2418a0a750",
+    *                "filename": "NP_ScreeningQuestionnaire_MASTER.xlsx",
+    *                "expired": "1",
+    *                "uploadedBy": "stude001@ucr.edu",
+    *                "complete": "0",
+    *                "path": "C:\\source\\mednickdb\\server\\uploads\\temp\\NP_ScreeningQuestionnaire_MASTER.xlsx",
+    *                "dateUploaded": 1500976865929
+    *            }
+    *        ]
+     */
+    app.get('/DeletedFiles',function(req,res){
+        DocumentBrowseController.getDeletedFiles(res,db);
     });
 }
 

@@ -18,7 +18,7 @@ var GeneralController = require('../controllers/general_Controller')
 
 module.exports = {
     updateParsedDocument: function (res,id,db) {
-        db.collection(GeneralController.FILEUPLOADS_COLLECTION).updateOne(
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).updateOne(
            { _id: ObjectId(id) },
            {
              $set: { "parsed": "1"},

@@ -3,3 +3,4 @@ public/node_modules/
 
 server/uploads/mednickFileSystem/
 server/uploads/temp/
+server/uploads/deleted/

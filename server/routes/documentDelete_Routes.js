@@ -29,56 +29,13 @@ router.use(function timeLog(req, res, next) {
 
 module.exports = function(app,db){
     app.post('/DeleteFile',function(req,res){
-        if(!req.id){
-            return res.status(400).send('No files were uploaded.')
+        if(!(req.body.id)){
+            return res.status(400).send('No ID was provided.')
         } else {
-            var data = req.body;
-            var fileQuantity = (req.files.docfile).length;
-            if (fileQuantity)
-            {
-                var file_objects = req.files.docfile;
-                file_objects.forEach(function(file_object) {
-                    console.log(file_object);
-
-                    data.filename = file_object.name;
-                    data.expired = "0";
-                    data.uploadedBy = "stude001@ucr.edu";
-
-                    // upload.incompleteUpload(res,file_object,data,function(res, ){
-// TODO finish this multiple file upload
-                    // });
-                });
-            }
-
-            else
-            {
-                var file_object = req.files.docfile;
-                var complete = DocumentUploadController.isComplete(data);
-
-                data.filename = file_object.name;
-                data.expired = "0"
-                data.uploadedBy = "stude001@ucr.edu";
-
-                if (complete) {
-                    DocumentUploadController.completeUpload(res,file_object,data,db,function(res,dir_path,file_object,data,db){
-                        DocumentUploadController.checkDir(res,dir_path,file_object,data,db,function(res,dir_path,file_object,data,db){
-                            DocumentUploadController.uploadFile(res,dir_path,file_object,data,db,function(res,collection,data,db){
-                                GeneralController.insertDocument(res, collection, data, db);
-                            })
-                        })
-                    });
-                } else {
-                    upload.incompleteUpload(res,file_object,entry,upload.CheckDir);
-                }
-            }
-// TODO fis this, idk wth is going on with this return
-            return// res.status(201).json("Uploading successfull");
+            DocumentDeleteController.deleteFile(res, db, req.body.id);
         }
     });
 
-    app.post('/files/temp/new/',function(req,res){
-        insertDocument(res,FILEUPLOADS_COLLECTION,req.body);
-    });
 }
 
 

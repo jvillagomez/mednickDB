@@ -24,6 +24,15 @@ var UPLOAD_TO = path.join(CWD,"uploads/mednickFileSystem")
 var TEMP_DIR = path.join(CWD,"uploads/temp")
 
 module.exports = {
+    getDeletedFiles: function(res,db){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({expired:"1"}).toArray(function(err,docs){
+            if (err) {
+              GeneralController.handleError(res, err);
+            } else {
+              res.status(200).json(docs);
+            }
+        });
+    },
     getTempFiles: function(res,db){
         db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
             if (err) {

@@ -24,13 +24,22 @@ var UPLOAD_TO = path.join(CWD,"uploads/mednickFileSystem")
 var TEMP_DIR = path.join(CWD,"uploads/temp")
 
 module.exports = {
-    getTempFiles: function(res,db){
-        db.dev.collection(general.FILEUPLOADS_COLLECTION).find({complete:"0",expired:"0"}).toArray(function(err,docs){
-            if (err) {
-              GeneralController.handleError(res, err);
-            } else {
-              res.status(200).json(docs);
-            }
+    downloadFile: function(res, db, id){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).find({_id: ObjectId(id)}).nextObject(function(err, doc) {
+            var filePath = doc.path;
+            var fileName = doc.filename;
+            res.sendFile(filePath, function (err) {
+                if (err) {
+                    res.status(500).send(err);
+                } else {
+                    console.log('Sent:', fileName);
+                }
+            });
         });
+
+
+        // collection.find().nextObject(function(err, item) {
+        //     db.close();
+        // });
     }
 }

@@ -28,6 +28,30 @@ router.use(function timeLog(req, res, next) {
 
 
 module.exports = function(app,db){
+    /**
+     * @api {post} /DeleteFile Delete file record
+     * @apiName PostDeleteFile
+     * @apiGroup Files_Delete
+      * @apiDescription Used to update metada, or complete a fileupload record entry.
+      * Provide document ID in URL, and values in request body.
+      * @apiParam {String} id          Unique string, created by DB at time of insertion.
+      *
+      * @apiExample Example usage:
+      * http://localhost/DeleteFile
+      *
+      * @apiSuccessExample {json} Success-Response:
+      *     HTTP/1.1 200 OK
+    *    {
+    *        "ok": 1,
+    *        "nModified": 1,
+    *        "n": 1,
+    *        "opTime": {
+    *            "ts": "6447281906034671618",
+    *            "t": 2
+    *        },
+    *        "electionId": "7fffffff0000000000000002"
+    *    }
+      */
     app.post('/DeleteFile',function(req,res){
         if(!(req.body.id)){
             return res.status(400).send('No ID was provided.')

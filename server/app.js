@@ -22,6 +22,7 @@ var DocumentBrowseRoutes = require('./routes/documentBrowse_Routes')
 var DocumentUploadRoutes = require('./routes/documentUpload_Routes')
 var DocumentUpdateRoutes = require('./routes/documentUpdate_Routes')
 var DocumentDeleteRoutes = require('./routes/documentDelete_Routes')
+var DocumentDownloadRoutes = require("./routes/documentDownload_Routes.js")
 var DataTableRoutes = require('./routes/dataTable_Routes')
 var InsertDataRoutes = require('./routes/microservice_Routes')
 
@@ -56,6 +57,7 @@ initializeDatabases(function(err, dbs) {
     DocumentUploadRoutes(app, dbs);
     DocumentUpdateRoutes(app, dbs);
     DocumentDeleteRoutes(app, dbs);
+    DocumentDownloadRoutes(app, dbs);
     DataTableRoutes(app, dbs);
     InsertDataRoutes(app, dbs);
 

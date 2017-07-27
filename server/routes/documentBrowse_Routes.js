@@ -30,7 +30,7 @@ module.exports = function(app,db){
      /**
       * @api {get} /Studies Request all unique study IDs
       * @apiName GetStudies
-      * @apiGroup DocumentBrowse
+      * @apiGroup Files_Browse
       * @apiDescription Retrieve a list of unique study IDs from all documents logged in DB.
       *
       * @apiExample Example usage:
@@ -60,7 +60,7 @@ module.exports = function(app,db){
      /**
       * @api {get} /Visits Request all unique visit IDs
       * @apiName GetVisits
-      * @apiGroup DocumentBrowse
+      * @apiGroup Files_Browse
       * @apiDescription Retrieve a list of unique visit IDs from all documents logged in DB.
       * Because VISIT IDs may overlap across different studies, a Study ID param is neccesary for reference.
       * @apiParam {String} study          Study ID needed to avoid overlapping/duplicate visit IDs.
@@ -97,7 +97,7 @@ module.exports = function(app,db){
      /**
       * @api {get} /Sessions Request all unique session IDs
       * @apiName GetSessions
-      * @apiGroup DocumentBrowse
+      * @apiGroup Files_Browse
       * @apiDescription Retrieve a list of unique session IDs from all documents logged in DB.
       * Because Session IDs may overlap across different studies, study ID and visit ID params are neccesary for reference.
       *
@@ -139,7 +139,7 @@ module.exports = function(app,db){
      /**
       * @api {get} /DocumentTypes Request all unique DocumentTypes
       * @apiName GetDocumentTypes
-      * @apiGroup DocumentBrowse
+      * @apiGroup Files_Browse
       * @apiDescription Retrieve a list of unique study IDs from all documents logged in DB.
       *
       * @apiExample Example usage:
@@ -167,9 +167,9 @@ module.exports = function(app,db){
     });
 
      /**
-      * @api {get} /Files Request all complete FileUpload records
+      * @api {get} /Files Get all complete file records
       * @apiName GetFiles
-      * @apiGroup DocumentBrowse
+      * @apiGroup Files_Browse
       * @apiDescription Retrieve all FileUpload records, that are complete with study, visit, session, and doctype metadata.
       * Returns fileupload records, not the file objects stored in fileserver.
 
@@ -237,9 +237,9 @@ module.exports = function(app,db){
     });
 
     /**
-     * @api {get} /File Request fileupload record by ID
+     * @api {get} /File Get file record, by ID
      * @apiName GetFile
-     * @apiGroup DocumentBrowse
+     * @apiGroup Files_Browse
       * @apiDescription Retrieve FileUpload record, matching ID param.
       * Returns matching fileupload record, not the file object stored in fileserver.
       * @apiParam {String} id          Unique string, created by DB at time of insertion.
@@ -273,9 +273,9 @@ module.exports = function(app,db){
     });
 
     /**
-     * @api {get} /TempFiles Request all incomplete FileUpload records
+     * @api {get} /TempFiles Request all incomplete file records
      * @apiName GetTempFiles
-     * @apiGroup DocumentBrowse
+     * @apiGroup Files_Browse
      * @apiDescription Retrieve all FileUpload records, that have incomplete metadata.
      * Returns fileupload records, not the file objects stored in fileserver.
      *
@@ -310,10 +310,11 @@ module.exports = function(app,db){
         console.log(db);
         DocumentBrowseController.getTempFiles(res,db);
     });
+
     /**
-     * @api {get} /DeletedFiles Request all incomplete FileUpload records
+     * @api {get} /DeletedFiles Get all deleted file records
      * @apiName GetDeletedFiles
-     * @apiGroup DocumentBrowse
+     * @apiGroup Files_Browse
      * @apiDescription Retrieve all deleted (expired) FileUpload records.
      * Returns deteled fileupload records, not the file objects stored in fileserver.
      * Places files in RECYCLE_BIN dir.

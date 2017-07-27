@@ -17,7 +17,7 @@ var DocumentUploadController = require('../controllers/documentUpload_Controller
 var GeneralController = require('../controllers/general_Controller')
 
 module.exports = {
-    updateParsedDocument: function (res,id,db) {
+    updateParsedStatus: function (res, db, id) {
         db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).updateOne(
            { _id: ObjectId(id) },
            {
@@ -29,7 +29,23 @@ module.exports = {
                  res.status(500).json({"error": err});
              }
              else {
-                 res.status(201).json(doc);
+                 res.status(200).json(doc);
+             }
+         });
+    },
+    updateDocument: function (res, db, id, changes) {
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).updateOne(
+           { _id: ObjectId(id) },
+           {
+             $set: changes,
+             $currentDate: { lastModified: true }
+         },
+         function(err,doc){
+             if(err){
+                 res.status(500).json({"error": err});
+             }
+             else {
+                 res.status(200).json(doc);
              }
          });
     }

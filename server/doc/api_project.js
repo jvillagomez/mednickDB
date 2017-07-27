@@ -1,7 +1,8 @@
 define({
   "name": "MednickDB docs",
   "version": "1.0.0",
-  "description": "API endpoint listing",
+  "description": "App Breakdown / API endpoint listing",
+  "title": "MednickDB docs",
   "template": {
     "forceLanguage": "en"
   },
@@ -10,7 +11,7 @@ define({
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2017-07-27T03:49:11.716Z",
+    "time": "2017-07-27T18:07:34.761Z",
     "url": "http://apidocjs.com",
     "version": "0.17.6"
   }

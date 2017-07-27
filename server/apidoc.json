@@ -2,7 +2,7 @@
     "name": "MednickDB docs",
     "title": "MednickDB docs",
     "version": "1.0.0",
-    "description": "API endpoint listing",
+    "description": "App Breakdown / API endpoint listing",
     "template": {
         "forceLanguage": "en"
     }

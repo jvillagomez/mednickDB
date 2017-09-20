@@ -122,20 +122,21 @@ module.exports = function(app,db){
       *         }
       */
     app.get('/Sessions', function(req,res){
-        var study = req.query.fileStudy
-        var visit = req.query.fileVisit
-        if(!study){
+        var fileStudy = req.query.fileStudy
+        var fileVisit = req.query.fileVisit
+        if(!fileStudy){
             return res.status(400).send('No STUDY ID provided.')
-        } else if (!visit){
+        } else if (!fileVisit){
             return res.status(400).send('No VISIT ID provided.')
         } else {
-            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileSession',{study:study,visit:visit},(function(err, docs){
+            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileSession',{fileStudy:fileStudy,fileVisit:fileVisit},(function(err, docs){
                 if (err) {
                   handleError(res, err.message, "Failed to get Sessions.");
                 } else {
                     docs = docs.map(function(doc){return doc.trim();});
                     docs = docs.filter(i=>i!='');
                     res.status(200).json(docs);
+                    console.log(docs);
                 }
             }));
         }

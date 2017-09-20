@@ -17,14 +17,14 @@
             },
             {
                 'queryStudies':{
-                method: 'GET',
-                url: url + '/Studies',
-                isArray: true
+                    method: 'GET',
+                    url: url + '/Studies',
+                    isArray: true
                 },
                 'queryVisits':{
                     method: 'GET',
                     params: {
-                        study: '@fileStudy'
+                        fileStudy: '@fileStudy'
                     },
                     url: url + '/Visits',
                     isArray: true
@@ -32,8 +32,8 @@
                 'querySessions':{
                     method: 'GET',
                     params: {
-                        study: '@fileStudy',
-                        visit: '@fileVisit'
+                        fileStudy: '@fileStudy',
+                        fileVisit: '@fileVisit'
                     },
                     url: url + '/Sessions',
                     isArray: true

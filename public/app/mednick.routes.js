@@ -99,7 +99,6 @@
                     }
                 }
             })
-
             .state('private.layout.documentFilters', {
                 url: '/documentFilters',
                 views: {
@@ -109,9 +108,15 @@
                     }
                 }
             })
-
-
-
+            // .state('private.layout.documentsTable', {
+            //     url: '/documentsTable',
+            //     views: {
+            //         '': {
+            //             templateUrl: 'app/DocumentsTable/documentsTable.html',
+            //             controller: 'DocumentsTable as vm'
+            //         }
+            //     }
+            // })
 
     }
 

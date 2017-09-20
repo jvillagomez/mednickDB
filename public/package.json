@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "angular": "^1.4.0",
+    "angular-material": "^1.0.0",
+    "angular-material-data-table": "^0.10.10",
     "gulp-sass": "^2.3.2"
   },
   "devDependencies": {

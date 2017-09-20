@@ -21,7 +21,8 @@
     "underscore": "^1.8.3",
     "angular-ui-router": "0.3.1",
     "lf-ng-md-file-input": "^1.4.8",
-    "angular-resource": "^1.5.9"
+    "angular-resource": "^1.5.9",
+    "angular-material-data-table": "^0.10.10"
   },
   "overrides": {
     "angular-material": {

@@ -19,19 +19,15 @@
         vm.sessionParameter = "";
         vm.documentTypeParameter = "";
 
-        vm.getVisits()
+        vm.getVisits = getVisits;
+        vm.getSessions = getSessions;
 
         vm.view = viewDoc;
         // ======================================
-
-
-
         init();
 
         function init() {
             getStudies();
-            getVisits();
-            // getSessions();
             getDocumentTypes();
         }
 
@@ -50,7 +46,6 @@
             return DocumentFiltersService.queryVisits(
                 {
                     fileStudy: vm.studyParameter
-                    // fileStudy: "CFS"
                 },
                 function(data) {
                     vm.visits = data
@@ -60,13 +55,17 @@
         }
 
         function getSessions() {
+            console.log("hitting GetSessions");
+            console.log(vm.studyParameter);
+            console.log(vm.visitParameter);
             return DocumentFiltersService.querySessions(
                 {
-                    fileStudy: "CFS",
-                    fileVisit: "v1"
+                    fileStudy: vm.studyParameter,
+                    fileVisit: vm.visitParameter
                 },
                 function(data) {
-                    vm.visits = data
+                    vm.sessions = data
+                    console.log(data);
                 }
             )
         }

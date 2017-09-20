@@ -16,7 +16,7 @@
         init();
 
         function init() {
-            getCompletedDocs();
+            getCompleteDocs();
             getIncompleteDocs();
         }
 
@@ -24,7 +24,7 @@
             $window.open(url, '_blank');
         }
 
-        function getCompletedDocs() {
+        function getCompleteDocs() {
             return DocumentsService.query(function(data) {
                 vm.completeDocs = data;
             })

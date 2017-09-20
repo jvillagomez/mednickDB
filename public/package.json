@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "gulp-sass": "^2.3.2"
+  },
   "devDependencies": {
     "del": "^2.2.2",
     "gulp": "^3.9.1",

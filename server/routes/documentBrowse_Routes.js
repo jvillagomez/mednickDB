@@ -48,10 +48,11 @@ module.exports = function(app,db){
       *         }
       */
     app.get('/Studies', function(req,res){
-        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('study',(function(err, docs){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileStudy',(function(err, docs){
             if (err) {
               handleError(res, err.message, "Failed to get studies.");
             } else {
+                console.log(docs)
               res.status(200).json(docs);
             }
         }));
@@ -80,15 +81,17 @@ module.exports = function(app,db){
       *         }
       */
     app.get('/Visits', function(req,res){
-        var study = req.query.study
-        if(!study){
+        var fileStudy = req.query.fileStudy
+        if(!fileStudy){
             return res.status(400).send('No STUDY ID provided.')
         } else {
-            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('visit',{study:study},(function(err, docs){
+            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileVisit',{fileStudy:fileStudy},(function(err, docs){
                 if (err) {
                   handleError(res, err.message, "Failed to get visits.");
                 } else {
-                  res.status(200).json(docs);
+                    docs = docs.map(function(doc){return doc.trim();});
+                    docs = docs.filter(i=>i!='');
+                    res.status(200).json(docs);
                 }
             }));
         }
@@ -119,18 +122,20 @@ module.exports = function(app,db){
       *         }
       */
     app.get('/Sessions', function(req,res){
-        var study = req.query.study
-        var visit = req.query.visit
+        var study = req.query.fileStudy
+        var visit = req.query.fileVisit
         if(!study){
             return res.status(400).send('No STUDY ID provided.')
         } else if (!visit){
             return res.status(400).send('No VISIT ID provided.')
         } else {
-            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('session',{study:study,visit:visit},(function(err, docs){
+            db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileSession',{study:study,visit:visit},(function(err, docs){
                 if (err) {
                   handleError(res, err.message, "Failed to get Sessions.");
                 } else {
-                  res.status(200).json(docs);
+                    docs = docs.map(function(doc){return doc.trim();});
+                    docs = docs.filter(i=>i!='');
+                    res.status(200).json(docs);
                 }
             }));
         }
@@ -157,11 +162,13 @@ module.exports = function(app,db){
       *         }
       */
     app.get('/DocumentTypes', function(req,res){
-        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('doctype',(function(err, docs){
+        db.dev.collection(GeneralController.FILEUPLOADS_COLLECTION).distinct('fileType',(function(err, docs){
             if (err) {
-              handleError(res, err.message, "Failed to get visits.");
+              handleError(res, err.message, "Failed to get document Types.");
             } else {
-              res.status(200).json(docs);
+                docs = docs.map(function(doc){return doc.trim();});
+                docs = docs.filter(i=>i!='');
+                res.status(200).json(docs);
             }
         }));
     });

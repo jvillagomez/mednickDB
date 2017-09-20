@@ -8,10 +8,12 @@
             'ui.router',
             'ngResource',
             'Mednick.Services',
+            'Foo',
             'Login',
             'Home',
             'Upload',
-            'Documents'
+            'Documents',
+            'DocumentFilters'
         ])
         .constant('MednickConfig', {
             apiUrl: 'http://127.0.0.1:8001'

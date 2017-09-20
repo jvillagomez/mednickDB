@@ -1,0 +1,52 @@
+<div flex-gt-sm="50" flex>
+    <!-- ===================================================================================== -->
+    <!-- STUDY dropdown (START)-->
+    <div layout="column" layout-align="center center" style="padding:40px" ng-cloak>
+      <p>Select can call an arbitrary function on show. If this function returns a promise, it will display a loading indicator while it is being resolved:</p>
+      <div layout="column" layout-align="center center">
+        <md-select placeholder="Choose a StudyID" ng-model="vm.studyParameter" ng-change="getVisits()" style="min-width: 200px;">
+          <md-option ng-value="study" ng-repeat="study in vm.studies">{{ study }}</md-option>
+        </md-select>
+        <p class="md-caption">You have assigned the task to: {{ study ? study : 'No study chosen' }}</p>
+      </div>
+    </div>
+    <!-- STUDY dropdown (END)-->
+    <!-- ===================================================================================== -->
+    <!-- VISIT dropdown (START)-->
+    <div layout="column" layout-align="center center" style="padding:40px" ng-cloak>
+      <p>You must choose a Study-ID, before selecting a Visit-ID</p>
+      <div layout="column" layout-align="center center">
+        <md-select placeholder="Choose a VisitID" ng-model="vm.visitParameter" style="min-width: 200px;">
+          <md-option ng-value="visit" ng-repeat="visit in vm.visits">{{ visit }}</md-option>
+        </md-select>
+        <p class="md-caption">You have assigned the task to: {{ visit ? visit : 'No visit chosen' }}</p>
+      </div>
+    </div>
+    <!-- VISIT dropdown (END)-->
+    <!-- ===================================================================================== -->
+    <!-- SESSION dropdown (START)-->
+    <!-- <div layout="column" layout-align="center center" style="padding:40px" ng-cloak>
+      <p>You must choose a Study-ID, Visit-ID, before selecting a Session-ID</p>
+      <div layout="column" layout-align="center center">
+        <md-select placeholder="Choose a SessionID" ng-model="vm.sessionParameter" style="min-width: 200px;">
+          <md-option ng-value="session" ng-repeat="session in vm.sessions">{{ session }}</md-option>
+        </md-select>
+        <p class="md-caption">You have assigned the task to: {{ session ? session : 'No session yet' }}</p>
+      </div>
+    </div> -->
+    <!-- SESSION dropdown (END)-->
+    <!-- ===================================================================================== -->
+    <!-- DOCTYPE dropdown (START)-->
+    <!-- <div layout="column" layout-align="center center" style="padding:40px" ng-cloak>
+      <p>Select a DocumentType-ID</p>
+      <div layout="column" layout-align="center center">
+        <md-select placeholder="Choose a Type" ng-model="vm.documentTypeParameter" md-on-open="loadUsers()" style="min-width: 200px;">
+          <md-option ng-value="type" ng-repeat="type in vm.documentTypes">{{ type }}</md-option>
+        </md-select>
+        <p class="md-caption">You have assigned the task to: {{ type ? type : 'No type chosen' }}</p>
+      </div>
+    </div> -->
+    <!-- DOCTYPE dropdown (END)-->
+    <!-- ===================================================================================== -->
+
+</div>

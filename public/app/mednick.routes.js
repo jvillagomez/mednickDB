@@ -90,6 +90,28 @@
                     }
                 }
             })
+            .state('private.layout.foo', {
+                url: '/foo',
+                views: {
+                    '': {
+                        templateUrl: 'app/Foo/foos.html',
+                        controller: 'FoosController as vm'
+                    }
+                }
+            })
+
+            .state('private.layout.documentFilters', {
+                url: '/documentFilters',
+                views: {
+                    '': {
+                        templateUrl: 'app/DocumentFilters/documentFilters.html',
+                        controller: 'DocumentFiltersController as vm'
+                    }
+                }
+            })
+
+
+
 
     }
 
